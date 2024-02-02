@@ -5,7 +5,9 @@ VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Template", "Template\Template.vcxproj", "{5FE99B7A-D913-4622-8486-C24B285A0EDF}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenGLFirstProject", "Basics\OpenGLFirstProject.vcxproj", "{D8286143-CC1A-41EF-9004-E2072A07A4B9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Basics", "Basics\OpenGLFirstProject.vcxproj", "{D8286143-CC1A-41EF-9004-E2072A07A4B9}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lighting", "Lighting\Lighting.vcxproj", "{ED5A9175-C377-43D1-AAAF-340869C859EB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +33,14 @@ Global
 		{D8286143-CC1A-41EF-9004-E2072A07A4B9}.Release|x64.Build.0 = Release|x64
 		{D8286143-CC1A-41EF-9004-E2072A07A4B9}.Release|x86.ActiveCfg = Release|Win32
 		{D8286143-CC1A-41EF-9004-E2072A07A4B9}.Release|x86.Build.0 = Release|Win32
+		{ED5A9175-C377-43D1-AAAF-340869C859EB}.Debug|x64.ActiveCfg = Debug|x64
+		{ED5A9175-C377-43D1-AAAF-340869C859EB}.Debug|x64.Build.0 = Debug|x64
+		{ED5A9175-C377-43D1-AAAF-340869C859EB}.Debug|x86.ActiveCfg = Debug|Win32
+		{ED5A9175-C377-43D1-AAAF-340869C859EB}.Debug|x86.Build.0 = Debug|Win32
+		{ED5A9175-C377-43D1-AAAF-340869C859EB}.Release|x64.ActiveCfg = Release|x64
+		{ED5A9175-C377-43D1-AAAF-340869C859EB}.Release|x64.Build.0 = Release|x64
+		{ED5A9175-C377-43D1-AAAF-340869C859EB}.Release|x86.ActiveCfg = Release|Win32
+		{ED5A9175-C377-43D1-AAAF-340869C859EB}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
