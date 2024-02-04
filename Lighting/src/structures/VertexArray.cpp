@@ -1,5 +1,11 @@
 #include "VertexArray.h"
 
+#include "VertexBufferLayout.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
+
+#include <iostream>
+
 VertexArray::VertexArray()
 {
 	glGenVertexArrays(1, &m_Id);
@@ -34,9 +40,14 @@ void VertexArray::AddVertexBuffer(const VertexBuffer& vb, const VertexBufferLayo
 		glEnableVertexAttribArray(i);
 		offset += attrib.count * VertexBufferAttribute::GetSizeOfType(attrib.type);
 	}
+	Unbind();
+	vb.Unbind();
 }
 
 void VertexArray::AddIndexBuffer(const IndexBuffer& ib)
 {
+	Bind();
 	ib.Bind();
+	Unbind();
+	ib.Unbind();
 }

@@ -2,12 +2,13 @@
 
 #include <glad/glad.h>
 
-IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int count)
-	:m_Count(count)
+IndexBuffer::IndexBuffer(const unsigned int* data, size_t count)
+	: m_Count(count)
 {
 	glGenBuffers(1, &m_Id);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Id);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned int), data, GL_STATIC_DRAW);
+	Bind();
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(size_t), data, GL_STATIC_DRAW);
+	Unbind();
 }
 
 IndexBuffer::~IndexBuffer()

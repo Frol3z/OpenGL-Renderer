@@ -1,31 +1,27 @@
 #include "Camera.h"
 
-Camera::Camera(glm::vec3 position, glm::vec3 up)
-	: m_Front(glm::vec3(0.0f, 0.0f, -1.0f)),
-	  m_Yaw(YAW),
-	  m_Pitch(PITCH),
-	  m_MovementSpeed(SPEED),
-	  m_MouseSensitivity(SENSITIVITY)
+#include <iostream>
+
+Camera::Camera(const float width, const float height, glm::vec3 position, glm::vec3 up)
+	: m_Front(glm::vec3(0.0f, 0.0f, -1.0f)), m_Yaw(YAW), m_Pitch(PITCH),
+	  m_Width(width), m_Height(height), m_FieldOfView(FOV),
+	  m_ProjectionMatrix(glm::perspective(glm::radians(FOV), (float)(width / height), 0.1f, 100.0f)),
+	  m_MovementSpeed(SPEED), m_MouseSensitivity(SENSITIVITY)
 {
 	m_Position = position;
 	m_WorldUp = up;
 	UpdateCameraVectors();
 }
 
-glm::mat4 Camera::GetViewMatrix()
+glm::mat4 Camera::GetViewMatrix() const
 {
 	// m_Position + m_Front = position of what the camera is looking at
 	return glm::lookAt(m_Position, m_Position + m_Front, m_Up);
-	
-	/*
-		glm::mat4 translation(1.0f);
-		translation[3] = glm::vec4(-m_Position, 1.0f);
-		glm::mat4 rotation(1.0f);
-		rotation[0] = glm::vec4(m_Right.x, m_Up.x, -m_Front.x, 0.0f);
-		rotation[1] = glm::vec4(m_Right.y, m_Up.y, -m_Front.y, 0.0f);
-		rotation[2] = glm::vec4(m_Right.z, m_Up.z, -m_Front.z, 0.0f);
-		return rotation * translation;
-	*/
+}
+
+glm::mat4 Camera::GetProjectionMatrix() const
+{
+	return m_ProjectionMatrix;
 }
 
 void Camera::ProcessKeyboard(CameraMovement direction, float deltaTime)
@@ -76,6 +72,17 @@ void Camera::ProcessMouseMovement(float xOffset, float yOffset, bool constrainPi
 	}
 
 	UpdateCameraVectors();
+}
+
+void Camera::UpdateFOV(float offset)
+{
+	m_FieldOfView -= (float) offset;
+	if (m_FieldOfView < 1.0f)
+		m_FieldOfView = 1.0f;
+	if (m_FieldOfView > 45.0f)
+		m_FieldOfView = 45.0f;
+
+	m_ProjectionMatrix = glm::perspective(glm::radians(m_FieldOfView), (float)(m_Width / m_Height), 0.1f, 100.0f);
 }
 
 void Camera::UpdateCameraVectors()
