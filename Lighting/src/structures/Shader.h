@@ -16,7 +16,7 @@ class Shader
 	public:
 		Shader(const char* vertexPath, const char* fragmentPath);
 		
-		void Use();
+		void Use() const;
 		
 		unsigned int GetShaderProgram() const;
 

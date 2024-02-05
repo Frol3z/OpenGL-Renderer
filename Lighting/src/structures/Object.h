@@ -1,42 +1,43 @@
 #pragma once
 
-class VertexArray;
-class VertexBufferLayout;
-class VertexBuffer;
-class IndexBuffer;
-class Shader;
-
-#include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+#include "Mesh.h"
+#include "Shader.h"
 
 class Object
 {
 public:
-	Object(const float* verts, size_t vertsSize, const unsigned int* indices = nullptr, size_t indicesCount = 0);
-	~Object();
+	Object(Mesh* mesh, Shader* shader, glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f));
+	Object(const Object& other);
 
 	void Draw() const;
-	void SetShader(const char* vertPath, const char* fragPath);
 	void SetColor(glm::vec3 color);
-	void SetLightColor(glm::vec3 color);
 	void SetViewAndProjectionMatrix(glm::mat4 view, glm::mat4 proj);
 	void SetPosition(glm::vec3 position);
 	void SetRotation(float degree, glm::vec3 rotation);
 	void SetScale(glm::vec3 scale);
+
+	void SetLightPosition(glm::vec3 position);
+	void SetLightColor(glm::vec3 color);
+
+protected:
+	glm::vec3 m_Color;
+	glm::vec3 m_Position;
+
 private:
-	VertexArray* m_VertexArray;
-	VertexBufferLayout* m_VertexBufferLayout;
-	VertexBuffer* m_VertexBuffer;
-	IndexBuffer* m_IndexBuffer;
+	Mesh* m_Mesh;
+
+	glm::mat4 m_TranslationTransform;
+	glm::mat4 m_RotationTransform;
+	glm::mat4 m_ScaleTransform;
+
+	glm::mat4 m_ViewTransform;
+	glm::mat4 m_ProjectionTransform;
 
 	Shader* m_Shader;
-	glm::vec3 m_Color;
+
+	glm::vec3 m_LightPosition;
 	glm::vec3 m_LightColor;
-
-	glm::mat4 m_ModelMatrix;
-	glm::mat4 m_ViewMatrix;
-	glm::mat4 m_ProjectionMatrix;
-
-	size_t m_NumberOfVertices;
 };

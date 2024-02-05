@@ -9,7 +9,7 @@
 
 #include "timer/Timer.h"
 #include "structures/Object.h"
-#include "structures/Cube.h"
+#include "structures/Light.h"
 #include "structures/Camera.h"
 #include "structures/Scene.h"
 
@@ -52,63 +52,67 @@ int main()
 	}
 
 	const float vertices[] = {
-	-0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f,  0.5f, -0.5f,
-	 0.5f,  0.5f, -0.5f,
-	-0.5f,  0.5f, -0.5f,
-	-0.5f, -0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-	-0.5f, -0.5f,  0.5f,
-	 0.5f, -0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
-	-0.5f, -0.5f,  0.5f,
+	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
 
-	-0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f, -0.5f,
-	-0.5f, -0.5f, -0.5f,
-	-0.5f, -0.5f, -0.5f,
-	-0.5f, -0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-	 0.5f,  0.5f,  0.5f,
-	 0.5f,  0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
+	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-	-0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f, -0.5f,
-	 0.5f, -0.5f,  0.5f,
-	 0.5f, -0.5f,  0.5f,
-	-0.5f, -0.5f,  0.5f,
-	-0.5f, -0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+	 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-	-0.5f,  0.5f, -0.5f,
-	 0.5f,  0.5f, -0.5f,
-	 0.5f,  0.5f,  0.5f,
-	 0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f,  0.5f,
-	-0.5f,  0.5f, -0.5f
+	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+	 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 	};
+	Mesh* cubeMesh = new Mesh(vertices, sizeof(vertices), VertexLayout::VFNF);
+	Shader* defaultShader = new Shader("res/shaders/shader.vert", "res/shaders/shader.frag");
+	Shader* lightShader = new Shader("res/shaders/shader.vert", "res/shaders/light.frag");
 
-	const unsigned int indices[] = {
-		0, 1, 2
-	};
-
-	Cube* cube = new Cube();
+	Object* cube = new Object(cubeMesh, defaultShader);
 	cube->SetColor(glm::vec3(1.0f, 0.5f, 0.31f));
+	cube->SetPosition(glm::vec3(1.0f, 0.0f, 0.0f));
 
-	Cube* light = new Cube();
-	light->SetPosition(glm::vec3(1.2f, 1.0f, 2.0f));
+	Object* cube1 = new Object(cubeMesh, defaultShader);
+	cube1->SetColor(glm::vec3(0.32145f, 0.72981f, 0.40253f));
+	cube1->SetPosition(glm::vec3(5.0f, 0.0f, 2.0f));
+
+	Light* light = new Light(cubeMesh, lightShader);
 	light->SetScale(glm::vec3(0.2f));
-	light->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
-	light->SetShader("res/shaders/shader.vert", "res/shaders/light.frag");
+	light->AddAffected(cube);
+	light->AddAffected(cube1);
 	
 	scene.AddObject(cube);
+	scene.AddObject(cube1);
 	scene.AddObject(light);
 
 	glEnable(GL_DEPTH_TEST);
@@ -121,10 +125,14 @@ int main()
 		// Process WASD inputs
 		ProcessCameraInput();
 		
-		// Update scene
+		// Modify light here
 		float normalizedSin = (sin(glfwGetTime()) / 2) + 0.5;
-		cube->SetLightColor(glm::vec3(1.0f, normalizedSin, 1.0f));
-		light->SetColor(glm::vec3(1.0f, normalizedSin, 1.0f));
+		light->SetColor(glm::vec3(normalizedSin, 1.0f, 1.0f));
+		light->SetPosition(glm::vec3(3 * sin(glfwGetTime()), 1.0f, 3 * cos(glfwGetTime())));
+		cube->SetPosition(glm::vec3(0.0f, normalizedSin, 0.0f));
+		cube->SetRotation(180 * normalizedSin, glm::vec3(0.0f, 1.0f, 0.0f));
+		
+		light->Update();
 		scene.Update();
 
 		// glClearColor(0.95f, 0.73f, 1.0f, 1.0f);
@@ -140,6 +148,9 @@ int main()
 	// Free heap
 	delete cube;
 	delete light;
+	delete cubeMesh;
+	delete defaultShader;
+	delete lightShader;
 
 	Shutdown();
 	return 0;
