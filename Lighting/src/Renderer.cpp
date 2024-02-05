@@ -9,6 +9,7 @@
 
 #include "timer/Timer.h"
 #include "structures/Object.h"
+#include "structures/Cube.h"
 #include "structures/Camera.h"
 #include "structures/Scene.h"
 
@@ -98,21 +99,17 @@ int main()
 		0, 1, 2
 	};
 
-	Object* obj = new Object(vertices, sizeof(vertices), indices, sizeof(indices));
-	obj->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-	obj->SetRotation(20, glm::vec3(1.0f, 0.0f, 0.0f));
+	Cube* cube = new Cube();
+	cube->SetColor(glm::vec3(1.0f, 0.5f, 0.31f));
 
-	Object* obj1 = new Object(vertices, sizeof(vertices), indices, sizeof(indices));
-	obj1->SetPosition(glm::vec3(0.0f, 0.0f, -3.0f));
-	obj1->SetScale(glm::vec3(0.2f));
-
-	Object* obj2 = new Object(vertices, sizeof(vertices), indices, sizeof(indices));
-	obj2->SetPosition(glm::vec3(5.0f, 2.0f, 1.0f));
-	obj2->SetScale(glm::vec3(5.0f));
+	Cube* light = new Cube();
+	light->SetPosition(glm::vec3(1.2f, 1.0f, 2.0f));
+	light->SetScale(glm::vec3(0.2f));
+	light->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+	light->SetShader("res/shaders/shader.vert", "res/shaders/light.frag");
 	
-	scene.AddObject(obj);
-	scene.AddObject(obj1);
-	scene.AddObject(obj2);
+	scene.AddObject(cube);
+	scene.AddObject(light);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -124,13 +121,16 @@ int main()
 		// Process WASD inputs
 		ProcessCameraInput();
 		
+		// Update scene
+		float normalizedSin = (sin(glfwGetTime()) / 2) + 0.5;
+		cube->SetLightColor(glm::vec3(1.0f, normalizedSin, 1.0f));
+		light->SetColor(glm::vec3(1.0f, normalizedSin, 1.0f));
 		scene.Update();
 
-		glClearColor(0.95f, 0.73f, 1.0f, 1.0f);
+		// glClearColor(0.95f, 0.73f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Draw
-		obj2->SetRotation(glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
 		scene.Draw();
 
 		glfwSwapBuffers(window);
@@ -138,9 +138,8 @@ int main()
 	}
 
 	// Free heap
-	delete obj;
-	delete obj1;
-	delete obj2;
+	delete cube;
+	delete light;
 
 	Shutdown();
 	return 0;

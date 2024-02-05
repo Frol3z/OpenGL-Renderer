@@ -13,11 +13,13 @@ class Shader;
 class Object
 {
 public:
-	Object(const float* verts, size_t vertsSize, const unsigned int* indices, size_t indicesCount);
+	Object(const float* verts, size_t vertsSize, const unsigned int* indices = nullptr, size_t indicesCount = 0);
 	~Object();
 
 	void Draw() const;
 	void SetShader(const char* vertPath, const char* fragPath);
+	void SetColor(glm::vec3 color);
+	void SetLightColor(glm::vec3 color);
 	void SetViewAndProjectionMatrix(glm::mat4 view, glm::mat4 proj);
 	void SetPosition(glm::vec3 position);
 	void SetRotation(float degree, glm::vec3 rotation);
@@ -29,6 +31,8 @@ private:
 	IndexBuffer* m_IndexBuffer;
 
 	Shader* m_Shader;
+	glm::vec3 m_Color;
+	glm::vec3 m_LightColor;
 
 	glm::mat4 m_ModelMatrix;
 	glm::mat4 m_ViewMatrix;

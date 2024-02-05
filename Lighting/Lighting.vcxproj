@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="src\glad\glad.c" />
     <ClCompile Include="src\structures\Camera.cpp" />
+    <ClCompile Include="src\structures\Cube.cpp" />
     <ClCompile Include="src\structures\IndexBuffer.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\structures\Scene.cpp" />
@@ -34,6 +35,7 @@
     <ClInclude Include="src\IndexBuffer.h" />
     <ClInclude Include="src\light\Light.h" />
     <ClInclude Include="src\structures\Camera.h" />
+    <ClInclude Include="src\structures\Cube.h" />
     <ClInclude Include="src\structures\Object.h" />
     <ClInclude Include="src\structures\Scene.h" />
     <ClInclude Include="src\structures\Shader.h" />
