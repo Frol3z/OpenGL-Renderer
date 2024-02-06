@@ -33,6 +33,13 @@ static void Shutdown();
 static int ShouldClose();
 static void UpdatePerformanceDisplay();
 static void ProcessCameraInput();
+static void CheckOpenGLErrors()
+{
+	GLenum error;
+	while ((error = glGetError()) != GL_NO_ERROR) {
+		std::cerr << "OpenGL error: " << error << std::endl;
+	}
+}
 
 static void OnResize(GLFWwindow* window, int width, int height);
 static void OnKeyboard(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -52,59 +59,59 @@ int main()
 	}
 
 	const float vertices[] = {
-	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-	 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-	 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-	 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
 
-	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-	-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-	-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-	-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-	-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-	 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-	 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-	 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-	 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-	 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 	};
+	
 	Mesh* cubeMesh = new Mesh(vertices, sizeof(vertices), VertexLayout::VFNF);
-	Shader* defaultShader = new Shader("res/shaders/shader.vert", "res/shaders/shader.frag");
+	Shader* gouraudShader = new Shader("res/shaders/gouraud.vert", "res/shaders/gouraud.frag");
+	Shader* phongShader = new Shader("res/shaders/shader.vert", "res/shaders/phong.frag");
 	Shader* lightShader = new Shader("res/shaders/shader.vert", "res/shaders/light.frag");
 
-	Object* cube = new Object(cubeMesh, defaultShader);
+	Object* cube = new Object(cubeMesh, gouraudShader);
 	cube->SetColor(glm::vec3(1.0f, 0.5f, 0.31f));
-	cube->SetPosition(glm::vec3(1.0f, 0.0f, 0.0f));
 
-	Object* cube1 = new Object(cubeMesh, defaultShader);
-	cube1->SetColor(glm::vec3(0.32145f, 0.72981f, 0.40253f));
-	cube1->SetPosition(glm::vec3(5.0f, 0.0f, 2.0f));
+	Object* cube1 = new Object(cubeMesh, phongShader);
+	cube1->SetColor(glm::vec3(1.0f, 0.5f, 0.31f));
 
 	Light* light = new Light(cubeMesh, lightShader);
 	light->SetScale(glm::vec3(0.2f));
@@ -128,9 +135,13 @@ int main()
 		// Modify light here
 		float normalizedSin = (sin(glfwGetTime()) / 2) + 0.5;
 		light->SetColor(glm::vec3(normalizedSin, 1.0f, 1.0f));
-		light->SetPosition(glm::vec3(3 * sin(glfwGetTime()), 1.0f, 3 * cos(glfwGetTime())));
+		light->SetPosition(glm::vec3(3 * sin(glfwGetTime()), 2.0f, 3 * cos(glfwGetTime())));
+		
 		cube->SetPosition(glm::vec3(0.0f, normalizedSin, 0.0f));
 		cube->SetRotation(180 * normalizedSin, glm::vec3(0.0f, 1.0f, 0.0f));
+		
+		cube1->SetPosition(glm::vec3(0.0f, normalizedSin + 2.0f, 0.0f));
+		cube1->SetRotation(180 * normalizedSin, glm::vec3(0.0f, 1.0f, 0.0f));
 		
 		light->Update();
 		scene.Update();
@@ -140,6 +151,7 @@ int main()
 
 		// Draw
 		scene.Draw();
+		CheckOpenGLErrors();
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -147,9 +159,11 @@ int main()
 
 	// Free heap
 	delete cube;
+	delete cube1;
 	delete light;
 	delete cubeMesh;
-	delete defaultShader;
+	delete gouraudShader;
+	delete phongShader;
 	delete lightShader;
 
 	Shutdown();

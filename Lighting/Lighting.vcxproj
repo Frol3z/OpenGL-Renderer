@@ -49,8 +49,10 @@
     <ClInclude Include="src\VertexBufferLayout.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="res\shaders\gouraud.frag" />
+    <None Include="res\shaders\gouraud.vert" />
     <None Include="res\shaders\light.frag" />
-    <None Include="res\shaders\shader.frag" />
+    <None Include="res\shaders\phong.frag" />
     <None Include="res\shaders\shader.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

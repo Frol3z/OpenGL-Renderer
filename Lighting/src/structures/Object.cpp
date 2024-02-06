@@ -36,7 +36,11 @@ void Object::Draw() const
 	m_Shader->SetVec3("lightColor", m_LightColor);
 	m_Shader->SetVec3("lightPosition", m_ViewTransform * glm::vec4(m_LightPosition, 1.0f));
 
-	glDrawArrays(GL_TRIANGLES, 0, m_Mesh->GetVertsCount());
+	size_t indicesCount = m_Mesh->GetIndicesCount();
+	if (indicesCount > 0)
+		glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, 0);
+	else
+		glDrawArrays(GL_TRIANGLES, 0, m_Mesh->GetVertsCount());
 
 	m_Mesh->Unbind();
 } 

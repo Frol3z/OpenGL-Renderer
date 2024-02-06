@@ -51,6 +51,7 @@ void Camera::ProcessKeyboard(CameraMovement direction, float deltaTime)
 		}
 	}
 	// m_Position.y = 0.0f;
+
 	UpdateCameraVectors();
 }
 

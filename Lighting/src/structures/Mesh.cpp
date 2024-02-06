@@ -5,7 +5,9 @@
 #include "VertexBufferLayout.h"
 #include "IndexBuffer.h"
 
-Mesh::Mesh(const float* vertices, size_t vSize, VertexLayout layout, const unsigned int* indices, size_t iCount)
+#include <iostream>
+
+Mesh::Mesh(const float* vertices, size_t vSize, VertexLayout layout, const unsigned int* indices, size_t iSize)
 	: m_VA(nullptr), m_VB(nullptr), m_VBL(nullptr), m_IB(nullptr), m_VertsCount(0)
 {
 	m_VA = new VertexArray();
@@ -33,7 +35,7 @@ Mesh::Mesh(const float* vertices, size_t vSize, VertexLayout layout, const unsig
 
 	if (indices)
 	{
-		m_IB = new IndexBuffer(indices, iCount);
+		m_IB = new IndexBuffer(indices, iSize, iSize / sizeof(unsigned int));
 		m_VA->AddIndexBuffer(*m_IB);
 	}
 }
@@ -54,4 +56,20 @@ void Mesh::Bind() const
 void Mesh::Unbind() const
 {
 	m_VA->Unbind();
+}
+
+size_t Mesh::GetIndicesCount() const
+{
+	if (m_IB)
+		return m_IB->GetCount();
+	else
+		return 0;
+}
+
+const unsigned int* Mesh::GetIndices() const 
+{ 
+	if (m_IB)
+		return m_IB->GetIndices();
+	else
+		return nullptr;
 }
