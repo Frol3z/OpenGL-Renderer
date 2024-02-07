@@ -20,7 +20,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\glad\glad.c" />
+    <ClCompile Include="src\imgui\imgui.cpp" />
+    <ClCompile Include="src\imgui\imgui_demo.cpp" />
+    <ClCompile Include="src\imgui\imgui_draw.cpp" />
+    <ClCompile Include="src\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="src\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="src\imgui\imgui_stdlib.cpp" />
+    <ClCompile Include="src\imgui\imgui_tables.cpp" />
+    <ClCompile Include="src\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\structures\Camera.cpp" />
+    <ClCompile Include="src\structures\Cubesphere.cpp" />
     <ClCompile Include="src\structures\IndexBuffer.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\structures\Mesh.cpp" />
@@ -32,14 +41,29 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\imgui\imconfig.h" />
+    <ClInclude Include="src\imgui\imgui.h" />
+    <ClInclude Include="src\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="src\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="src\imgui\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="src\imgui\imgui_internal.h" />
+    <ClInclude Include="src\imgui\imgui_stdlib.h" />
+    <ClInclude Include="src\imgui\imstb_rectpack.h" />
+    <ClInclude Include="src\imgui\imstb_textedit.h" />
+    <ClInclude Include="src\imgui\imstb_truetype.h" />
     <ClInclude Include="src\IndexBuffer.h" />
     <ClInclude Include="src\light\Light.h" />
     <ClInclude Include="src\structures\Camera.h" />
+    <ClInclude Include="src\structures\Cubesphere.h" />
+    <ClInclude Include="src\structures\IndexBuffer.h" />
     <ClInclude Include="src\structures\Light.h" />
     <ClInclude Include="src\structures\Mesh.h" />
     <ClInclude Include="src\structures\Object.h" />
     <ClInclude Include="src\structures\Scene.h" />
     <ClInclude Include="src\structures\Shader.h" />
+    <ClInclude Include="src\structures\VertexArray.h" />
+    <ClInclude Include="src\structures\VertexBuffer.h" />
+    <ClInclude Include="src\structures\VertexBufferLayout.h" />
     <ClInclude Include="src\timer\Timer.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\Texture.h" />
@@ -54,6 +78,10 @@
     <None Include="res\shaders\light.frag" />
     <None Include="res\shaders\phong.frag" />
     <None Include="res\shaders\shader.vert" />
+    <None Include="src\imgui\imgui.natstepfilter" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="src\imgui\imgui.natvis" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
