@@ -1,7 +1,3 @@
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw.h"
-#include "imgui/imgui_impl_opengl3.h"
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -11,12 +7,13 @@
 #include <iostream>
 #include <sstream>
 
-#include "timer/Timer.h"
-#include "structures/Object.h"
-#include "structures/Light.h"
-#include "structures/Camera.h"
-#include "structures/Scene.h"
-#include "structures/Cubesphere.h"
+#include "core/timer/Timer.h"
+#include "core/Object.h"
+#include "core/Light.h"
+#include "core/Camera.h"
+#include "core/Scene.h"
+#include "vendor/cubesphere/Cubesphere.h"
+#include "core/ImGuiWindow.h"
 
 // Preprocessors
 #define WINDOW_TITLE "OpenGL Renderer"
@@ -25,27 +22,28 @@
 #define LOG(x) std::cout << x << std::endl
 
 // Global variables
+ImGuiWindow imGui;
 GLFWwindow* window;
 bool isFullscreen = false;
 
 Timer& timer = Timer::Get();
 Scene scene;
 
+Material* defaultMaterial = new Material(glm::vec3(1.0f, 0.5f, 0.31f), glm::vec3(1.0f, 0.5f, 0.31f), glm::vec3(1.0f), 32.0f);
+Material* lightMaterial = new Material(glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f), 32.0f);
+
 float lastX = 0.0f;
 float lastY = 0.0f;
 bool isFirstMouse = true;
 bool isCursorDisabled = true;
-
-glm::vec3 transform(0.0f);
 
 static int Init();
 static void Shutdown();
 static int ShouldClose();
 static void UpdatePerformanceDisplay();
 static void ProcessCameraInput();
+static void ClearBuffers();
 static void CheckOpenGLErrors();
-static void UpdateImGui();
-static void RenderImGui();
 
 static void OnResize(GLFWwindow* window, int width, int height);
 static void OnKeyboard(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -116,15 +114,15 @@ int main()
 	
 	Mesh* cubeMesh = new Mesh(cubeVertices, sizeof(cubeVertices), VertexLayout::VFNF);
 	Mesh* sphereMesh = new Mesh(sphereVertices, sphereVerticesSize, VertexLayout::VFNF, sphere.getIndices(), sphere.getIndexSize());
+
 	Shader* gouraudShader = new Shader("res/shaders/gouraud.vert", "res/shaders/gouraud.frag");
 	Shader* phongShader = new Shader("res/shaders/shader.vert", "res/shaders/phong.frag");
 	Shader* lightShader = new Shader("res/shaders/shader.vert", "res/shaders/light.frag");
 
-	Object* defaultSphere = new Object(sphereMesh, phongShader);
-	defaultSphere->SetColor(glm::vec3(1.0f, 0.5f, 0.31f));
-	defaultSphere->SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+	Object* defaultSphere = new Object(sphereMesh, phongShader, defaultMaterial);
 
-	Light* light = new Light(sphereMesh, lightShader);
+	Light* light = new Light(sphereMesh, lightShader, lightMaterial);
+	light->SetPosition(glm::vec3(2.0f, 4.0f, 2.0f));
 	light->SetScale(glm::vec3(0.2f));
 	light->AddAffected(defaultSphere);
 	
@@ -137,8 +135,10 @@ int main()
 	{
 		glfwPollEvents();
 
-		UpdateImGui();
+		// ImGui
+		imGui.Update(isCursorDisabled);
 
+		// Timer
 		timer.Update(glfwGetTime());
 		UpdatePerformanceDisplay();
 		
@@ -146,22 +146,24 @@ int main()
 		ProcessCameraInput();
 		
 		// Modify light here
-		float normalizedSin = (sin(glfwGetTime()) / 2) + 0.5;
-		light->SetColor(glm::vec3(normalizedSin, 1.0f, 1.0f));
-		light->SetPosition(glm::vec3(2 * sin(glfwGetTime()), 0.0f, 2 * cos(glfwGetTime())));
-		defaultSphere->SetPosition(transform);
-		
+		// light->SetColor(glm::vec3(sin(glfwGetTime() * 2.0f), sin(glfwGetTime() * 0.7f), sin(glfwGetTime() * 1.3f)));
+		// light->SetPosition(glm::vec3(2 * sin(glfwGetTime()), 4.0f, 2 * cos(glfwGetTime())));
+		defaultSphere->SetPosition(imGui.GetObjectPosition());
+		defaultSphere->SetAmbient(imGui.GetObjectAmbient());
+		defaultSphere->SetDiffuse(imGui.GetObjectDiffuse());
+		defaultSphere->SetSpecular(imGui.GetObjectSpecular());
+		defaultSphere->SetShininess(imGui.GetObjectShininess());
+		light->SetPosition(imGui.GetLightPosition());
+
 		light->Update();
 		scene.Update();
 
-		// glClearColor(0.95f, 0.73f, 1.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		ClearBuffers();
 
 		// Draw
 		scene.Draw();
 		CheckOpenGLErrors();
-
-		RenderImGui();
+		imGui.Render();
 
 		glfwSwapBuffers(window);
 	}
@@ -172,6 +174,8 @@ int main()
 	delete cubeMesh;
 	delete sphereMesh;
 	delete sphereVertices;
+	delete defaultMaterial;
+	delete lightMaterial;
 	delete gouraudShader;
 	delete phongShader;
 	delete lightShader;
@@ -221,27 +225,14 @@ static int Init()
 	glfwSetScrollCallback(window, OnScroll);
 	glfwSetMouseButtonCallback(window, OnMouseButton);
 
-	// Setup Dear ImGui context
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-
-	// Setup Platform/Renderer backends
-	// Second param install_callback=true will install GLFW callbacks and chain to existing ones.
-	ImGui_ImplGlfw_InitForOpenGL(window, true);         
-	ImGui_ImplOpenGL3_Init();
+	imGui.Init(window);
 	
 	return 1;
 }
 
 static void Shutdown()
 {
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
-
+	imGui.Shutdown();
 	glfwTerminate();
 }
 
@@ -282,44 +273,18 @@ static void ProcessCameraInput()
 	}
 }
 
+static void ClearBuffers()
+{
+	// glClearColor(0.95f, 0.73f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
 static void CheckOpenGLErrors()
 {
 	GLenum error;
 	while ((error = glGetError()) != GL_NO_ERROR) {
 		std::cerr << "OpenGL error: " << error << std::endl;
 	}
-}
-
-static void UpdateImGui() 
-{
-	// Start the Dear ImGui frame
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
-
-	// Cursor handling
-	if (isCursorDisabled)
-		ImGui::SetNextWindowCollapsed(true, ImGuiCond_Always);
-	else
-		ImGui::SetNextWindowCollapsed(false, ImGuiCond_Always);
-
-	// The actual ImGui window's layout
-	ImGui::Begin("ImGui");
-
-	ImGui::SeparatorText("Sphere position");
-	ImGui::SliderFloat("X", &transform.x, -5.0f, 5.0f);
-	ImGui::SliderFloat("Y", &transform.y, -5.0f, 5.0f);
-	ImGui::SliderFloat("Z", &transform.z, -5.0f, 5.0f);
-
-	ImGui::End();
-
-	// ImGui::ShowDemoWindow();
-}
-
-static void RenderImGui()
-{
-	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 static void OnKeyboard(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -459,9 +424,10 @@ static void PrintDefault()
 {
 	LOG("OpenGL version: " << glGetString(GL_VERSION));
 	LOG("Press ESC to exit");
+	LOG("Press F to toggle borderless fullscreen");
+	LOG("Right click to toggle mouse visibility");
 	LOG("Press G to toggle wireframe mode");
-	LOG("Press UP/DOWN arrows to INCREASE/DECREASE second texture's visibility");
-	LOG("Press WASD and mouse to move around (scroll to zoom)");
+	LOG("Use WASD and mouse to move around (scroll to zoom)");
 }
 
 static const float* Combine(const float* vertices, const float* normals, size_t vertCount, size_t& newSize)

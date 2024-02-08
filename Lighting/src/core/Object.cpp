@@ -2,12 +2,13 @@
 
 #include <iostream>
 
-Object::Object(Mesh* mesh, Shader* shader, glm::vec3 color)
+Object::Object(Mesh* mesh, Shader* shader, Material* material)
 	: m_TranslationTransform(glm::mat4(1.0f)), m_RotationTransform(glm::mat4(1.0f)), m_ScaleTransform(glm::mat4(1.0f)),
 	  m_ViewTransform(glm::mat4(1.0f)), m_ProjectionTransform(glm::mat4(1.0f)),
-	  m_Mesh(mesh), m_Shader(shader), m_Color(color), m_Position(glm::vec3(0.0f)),
+	  m_Mesh(mesh), m_Shader(shader), m_Material(material), m_Position(glm::vec3(0.0f)),
 	  m_LightPosition(glm::vec3(0.0f)), m_LightColor(glm::vec3(1.0f))
-{}
+{
+}
 
 Object::Object(const Object& other)
 	: m_TranslationTransform(other.m_TranslationTransform),
@@ -17,7 +18,7 @@ Object::Object(const Object& other)
 	m_ProjectionTransform(other.m_ProjectionTransform),
 	m_Mesh(other.m_Mesh),
 	m_Shader(other.m_Shader),
-	m_Color(other.m_Color),
+	m_Material(other.m_Material),
 	m_Position(other.m_Position),
 	m_LightPosition(other.m_LightPosition),
 	m_LightColor(other.m_LightColor)
@@ -32,9 +33,15 @@ void Object::Draw() const
 	m_Shader->SetMat4("view", m_ViewTransform);
 	m_Shader->SetMat4("projection", m_ProjectionTransform);
 
-	m_Shader->SetVec3("objectColor", m_Color);
-	m_Shader->SetVec3("lightColor", m_LightColor);
-	m_Shader->SetVec3("lightPosition", m_ViewTransform * glm::vec4(m_LightPosition, 1.0f));
+	m_Shader->SetVec3("material.ambient", m_Material->ambient);
+	m_Shader->SetVec3("material.diffuse", m_Material->diffuse);
+	m_Shader->SetVec3("material.specular", m_Material->specular);
+	m_Shader->SetFloat("material.shininess", m_Material->shininess);
+
+	m_Shader->SetVec3("light.position", m_ViewTransform * glm::vec4(m_LightPosition, 1.0f));
+	m_Shader->SetVec3("light.ambient", 0.2f * 0.5f * m_LightColor);
+	m_Shader->SetVec3("light.diffuse", 0.5f * m_LightColor);
+	m_Shader->SetVec3("light.specular", m_LightColor);
 
 	size_t indicesCount = m_Mesh->GetIndicesCount();
 	if (indicesCount > 0)
@@ -45,9 +52,29 @@ void Object::Draw() const
 	m_Mesh->Unbind();
 } 
 
-void Object::SetColor(glm::vec3 color)
+void Object::SetMaterial(Material* material)
 {
-	m_Color = color;
+	m_Material = material;
+}
+
+void Object::SetAmbient(glm::vec3 ambient)
+{
+	m_Material->ambient = ambient;
+}
+
+void Object::SetDiffuse(glm::vec3 diffuse)
+{
+	m_Material->diffuse = diffuse;
+}
+
+void Object::SetSpecular(glm::vec3 specular)
+{
+	m_Material->specular = specular;
+}
+
+void Object::SetShininess(float shininess)
+{
+	m_Material->shininess = shininess;
 }
 
 void Object::SetViewAndProjectionMatrix(glm::mat4 view, glm::mat4 proj)
@@ -83,4 +110,5 @@ void Object::SetLightPosition(glm::vec3 position)
 void Object::SetLightColor(glm::vec3 color)
 {
 	m_LightColor = color;
+	m_Material->specular = 0.5f * m_LightColor;
 }

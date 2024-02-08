@@ -3,17 +3,22 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "Mesh.h"
+#include "geometry/Mesh.h"
 #include "Shader.h"
+#include "Material.h"
 
 class Object
 {
 public:
-	Object(Mesh* mesh, Shader* shader, glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f));
+	Object(Mesh* mesh, Shader* shader, Material* material);
 	Object(const Object& other);
 
-	void Draw() const;
-	void SetColor(glm::vec3 color);
+	virtual void Draw() const;
+	void SetMaterial(Material* material);
+	void SetAmbient(glm::vec3 ambient);
+	void SetDiffuse(glm::vec3 diffuse);
+	void SetSpecular(glm::vec3 specular);
+	void SetShininess(float shininess);
 	void SetViewAndProjectionMatrix(glm::mat4 view, glm::mat4 proj);
 	void SetPosition(glm::vec3 position);
 	void SetRotation(float degree, glm::vec3 rotation);
@@ -23,10 +28,6 @@ public:
 	void SetLightColor(glm::vec3 color);
 
 protected:
-	glm::vec3 m_Color;
-	glm::vec3 m_Position;
-
-private:
 	Mesh* m_Mesh;
 
 	glm::mat4 m_TranslationTransform;
@@ -37,6 +38,8 @@ private:
 	glm::mat4 m_ProjectionTransform;
 
 	Shader* m_Shader;
+	Material* m_Material;
+	glm::vec3 m_Position;
 
 	glm::vec3 m_LightPosition;
 	glm::vec3 m_LightColor;
