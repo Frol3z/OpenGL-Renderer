@@ -2,7 +2,8 @@
 
 enum VertexLayout {
 	VF = 0,
-	VFNF
+	VFNF,
+	VFNFTF
 };
 
 class Mesh

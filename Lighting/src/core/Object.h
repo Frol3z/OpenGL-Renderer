@@ -6,6 +6,7 @@
 #include "geometry/Mesh.h"
 #include "Shader.h"
 #include "Material.h"
+#include "Texture.h"
 
 class Object
 {
@@ -23,6 +24,7 @@ public:
 	void SetPosition(glm::vec3 position);
 	void SetRotation(float degree, glm::vec3 rotation);
 	void SetScale(glm::vec3 scale);
+	void SetTexture(Texture* texture);
 
 	void SetLightPosition(glm::vec3 position);
 	void SetLightColor(glm::vec3 color);
@@ -40,6 +42,8 @@ protected:
 	Shader* m_Shader;
 	Material* m_Material;
 	glm::vec3 m_Position;
+
+	Texture* m_Texture;
 
 	glm::vec3 m_LightPosition;
 	glm::vec3 m_LightColor;

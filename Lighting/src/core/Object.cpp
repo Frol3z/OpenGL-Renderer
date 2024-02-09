@@ -5,7 +5,7 @@
 Object::Object(Mesh* mesh, Shader* shader, Material* material)
 	: m_TranslationTransform(glm::mat4(1.0f)), m_RotationTransform(glm::mat4(1.0f)), m_ScaleTransform(glm::mat4(1.0f)),
 	  m_ViewTransform(glm::mat4(1.0f)), m_ProjectionTransform(glm::mat4(1.0f)),
-	  m_Mesh(mesh), m_Shader(shader), m_Material(material), m_Position(glm::vec3(0.0f)),
+	  m_Mesh(mesh), m_Shader(shader), m_Material(material), m_Position(glm::vec3(0.0f)), m_Texture(nullptr),
 	  m_LightPosition(glm::vec3(0.0f)), m_LightColor(glm::vec3(1.0f))
 {
 }
@@ -20,6 +20,7 @@ Object::Object(const Object& other)
 	m_Shader(other.m_Shader),
 	m_Material(other.m_Material),
 	m_Position(other.m_Position),
+	m_Texture(other.m_Texture),
 	m_LightPosition(other.m_LightPosition),
 	m_LightColor(other.m_LightColor)
 {}
@@ -28,6 +29,9 @@ void Object::Draw() const
 {
 	m_Shader->Use();
 	m_Mesh->Bind();
+
+	if (m_Texture)
+		m_Texture->Use();
 
 	m_Shader->SetMat4("model", m_TranslationTransform * m_RotationTransform  * m_ScaleTransform);
 	m_Shader->SetMat4("view", m_ViewTransform);
@@ -100,6 +104,11 @@ void Object::SetScale(glm::vec3 scale)
 {
 	m_ScaleTransform = glm::mat4(1.0f);
 	m_ScaleTransform = glm::scale(m_ScaleTransform, scale);
+}
+
+void Object::SetTexture(Texture* texture)
+{
+	m_Texture = texture;
 }
 
 void Object::SetLightPosition(glm::vec3 position)

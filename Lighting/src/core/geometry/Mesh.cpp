@@ -29,6 +29,14 @@ Mesh::Mesh(const float* vertices, size_t vSize, VertexLayout layout, const unsig
 			m_VertsCount = vSize / 6 * sizeof(float);
 			break;
 		}
+		case VFNFTF:
+		{
+			m_VBL->Push<float>(3);
+			m_VBL->Push<float>(3);
+			m_VBL->Push<float>(2);
+			m_VertsCount = vSize / 8 * sizeof(float);
+			break;
+		}
 	}
 
 	m_VA->AddVertexBuffer(*m_VB, *m_VBL);
