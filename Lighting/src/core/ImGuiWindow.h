@@ -9,7 +9,7 @@ public:
 		: m_ObjectPosition{0.0f, 0.0f, 0.0f}, 
 		m_ObjectAmbient { 1.0f, 0.5f, 0.31f }, m_ObjectDiffuse{ 1.0f, 0.5f, 0.31f },
 		m_ObjectSpecular {0.5f, 0.5f, 0.5f}, m_ObjectShininess(32.0f),
-		m_LightPosition { 2.0f, 4.0f, 1.0f } 
+		m_LightPosition { 2.0f, 1.0f, 1.0f }, m_LightColor {1.0f, 1.0f, 1.0f}, m_LightIntensity(0.2f)
 	{};
 
 public:
@@ -48,6 +48,21 @@ public:
 		return glm::vec3(m_LightPosition[0], m_LightPosition[1], m_LightPosition[2]);
 	};
 
+	inline glm::vec3 GetLightAmbient() const
+	{
+		return glm::vec3(m_LightIntensity * m_LightColor[0], m_LightIntensity * m_LightColor[1], m_LightIntensity * m_LightColor[1]);
+	};
+
+	inline glm::vec3 GetLightDiffuse() const
+	{
+		return glm::vec3(m_LightColor[0], m_LightColor[1], m_LightColor[2]);
+	};
+
+	inline glm::vec3 GetLightSpecular() const
+	{
+		return glm::vec3(m_LightColor[0], m_LightColor[1], m_LightColor[2]);
+	};
+
 private:
 	float m_ObjectPosition[3];
 	float m_ObjectAmbient[3];
@@ -56,4 +71,6 @@ private:
 	float m_ObjectShininess;
 
 	float m_LightPosition[3];
+	float m_LightColor[3];
+	float m_LightIntensity;
 };

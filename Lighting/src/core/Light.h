@@ -20,7 +20,7 @@ public:
 		m_Shader->SetMat4("view", m_ViewTransform);
 		m_Shader->SetMat4("projection", m_ProjectionTransform);
 
-		m_Shader->SetVec3("color", m_Material->ambient);
+		m_Shader->SetVec3("color", m_Material->specular);
 
 		size_t indicesCount = m_Mesh->GetIndicesCount();
 		if (indicesCount > 0)
@@ -45,11 +45,16 @@ public:
 	{
 		for (auto object : m_AffectedList)
 		{
-			object->SetLightColor(this->m_Material->ambient);
+			object->SetLightAmbient(this->m_Material->ambient);
+			object->SetLightDiffuse(this->m_Material->diffuse);
+			object->SetLightSpecular(this->m_Material->specular);
 			object->SetLightPosition(this->m_Position);
 		}
 	}
 
 private:
 	std::vector<Object*> m_AffectedList;
+	glm::vec3 m_Ambient;
+	glm::vec3 m_Diffuse;
+	glm::vec3 m_Specular;
 };

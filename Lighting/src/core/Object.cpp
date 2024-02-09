@@ -1,12 +1,17 @@
 #include "Object.h"
 
+#include <GLFW/glfw3.h>
 #include <iostream>
 
 Object::Object(Mesh* mesh, Shader* shader, Material* material)
 	: m_TranslationTransform(glm::mat4(1.0f)), m_RotationTransform(glm::mat4(1.0f)), m_ScaleTransform(glm::mat4(1.0f)),
 	  m_ViewTransform(glm::mat4(1.0f)), m_ProjectionTransform(glm::mat4(1.0f)),
-	  m_Mesh(mesh), m_Shader(shader), m_Material(material), m_Position(glm::vec3(0.0f)), m_Texture(nullptr),
-	  m_LightPosition(glm::vec3(0.0f)), m_LightColor(glm::vec3(1.0f))
+	  m_Mesh(mesh), m_Shader(shader), m_Material(material), m_Position(glm::vec3(0.0f)), 
+	  m_Texture(nullptr), m_SpecularTexture(nullptr), m_EmissionMap(nullptr),
+	  m_LightPosition(glm::vec3(0.0f)), 
+	  m_LightAmbient(0.2f * 0.5f * glm::vec3(1.0f)), 
+	  m_LightDiffuse(0.5f * glm::vec3(1.0f)), 
+	  m_LightSpecular(glm::vec3(1.0f))
 {
 }
 
@@ -21,8 +26,12 @@ Object::Object(const Object& other)
 	m_Material(other.m_Material),
 	m_Position(other.m_Position),
 	m_Texture(other.m_Texture),
+	m_SpecularTexture(other.m_Texture),
+	m_EmissionMap(other.m_EmissionMap),
 	m_LightPosition(other.m_LightPosition),
-	m_LightColor(other.m_LightColor)
+	m_LightAmbient(other.m_LightAmbient),
+	m_LightDiffuse(other.m_LightDiffuse),
+	m_LightSpecular(other.m_LightSpecular)
 {}
 
 void Object::Draw() const
@@ -31,22 +40,45 @@ void Object::Draw() const
 	m_Mesh->Bind();
 
 	if (m_Texture)
+	{
+		glActiveTexture(GL_TEXTURE0);
 		m_Texture->Use();
 
+		m_Shader->SetInt("material.diffuse", 0);
+
+		if (m_SpecularTexture)
+		{
+			glActiveTexture(GL_TEXTURE1);
+			m_SpecularTexture->Use();
+
+			m_Shader->SetInt("material.specular", 1);
+		}
+
+		if (m_EmissionMap)
+		{
+			glActiveTexture(GL_TEXTURE2);
+			m_EmissionMap->Use();
+
+			m_Shader->SetInt("material.emission", 2);
+		}
+	}
+
+	// Vertex shader uniforms
 	m_Shader->SetMat4("model", m_TranslationTransform * m_RotationTransform  * m_ScaleTransform);
 	m_Shader->SetMat4("view", m_ViewTransform);
 	m_Shader->SetMat4("projection", m_ProjectionTransform);
 
-	m_Shader->SetVec3("material.ambient", m_Material->ambient);
-	m_Shader->SetVec3("material.diffuse", m_Material->diffuse);
-	m_Shader->SetVec3("material.specular", m_Material->specular);
 	m_Shader->SetFloat("material.shininess", m_Material->shininess);
 
+	// Fragment shader light uniforms
 	m_Shader->SetVec3("light.position", m_ViewTransform * glm::vec4(m_LightPosition, 1.0f));
-	m_Shader->SetVec3("light.ambient", 0.2f * 0.5f * m_LightColor);
-	m_Shader->SetVec3("light.diffuse", 0.5f * m_LightColor);
-	m_Shader->SetVec3("light.specular", m_LightColor);
+	m_Shader->SetVec3("light.ambient", m_LightAmbient);
+	m_Shader->SetVec3("light.diffuse", m_LightDiffuse);
+	m_Shader->SetVec3("light.specular", m_LightSpecular);
 
+	m_Shader->SetFloat("time", 3 * glfwGetTime());
+
+	// Rendering geometry
 	size_t indicesCount = m_Mesh->GetIndicesCount();
 	if (indicesCount > 0)
 		glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, 0);
@@ -111,13 +143,32 @@ void Object::SetTexture(Texture* texture)
 	m_Texture = texture;
 }
 
+void Object::SetSpecularTexture(Texture* texture)
+{
+	m_SpecularTexture = texture;
+}
+
+void Object::SetEmissionMap(Texture* texture)
+{
+	m_EmissionMap = texture;
+}
+
 void Object::SetLightPosition(glm::vec3 position)
 {
 	m_LightPosition = position;
 }
 
-void Object::SetLightColor(glm::vec3 color)
+void Object::SetLightAmbient(glm::vec3 ambient)
 {
-	m_LightColor = color;
-	m_Material->specular = 0.5f * m_LightColor;
+	m_LightAmbient = ambient;
+}
+
+void Object::SetLightDiffuse(glm::vec3 diffuse)
+{
+	m_LightDiffuse = diffuse;
+}
+
+void Object::SetLightSpecular(glm::vec3 specular)
+{
+	m_LightSpecular = specular;
 }

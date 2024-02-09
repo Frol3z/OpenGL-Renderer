@@ -120,16 +120,20 @@ int main()
 	Shader* lightShader = new Shader("res/shaders/shader.vert", "res/shaders/light.frag");
 
 	Texture* metallicBoxTex = new Texture("res/textures/container.png");
+	Texture* metallicBoxSpecularTex = new Texture("res/textures/container_specular.png");
+	Texture* emissionTex = new Texture("res/textures/container_emission_2.png");
 
-	Object* defaultSphere = new Object(cubeMesh, phongShader, defaultMaterial);
-	defaultSphere->SetTexture(metallicBoxTex);
+	Object* defaultObject = new Object(cubeMesh, phongShader, defaultMaterial);
+	defaultObject->SetTexture(metallicBoxTex);
+	defaultObject->SetSpecularTexture(metallicBoxSpecularTex);
+	defaultObject->SetEmissionMap(emissionTex);
 
 	Light* light = new Light(sphereMesh, lightShader, lightMaterial);
 	light->SetPosition(glm::vec3(2.0f, 4.0f, 2.0f));
 	light->SetScale(glm::vec3(0.2f));
-	light->AddAffected(defaultSphere);
+	light->AddAffected(defaultObject);
 	
-	scene.AddObject(defaultSphere);
+	scene.AddObject(defaultObject);
 	scene.AddObject(light);
 
 	glEnable(GL_DEPTH_TEST);
@@ -149,14 +153,14 @@ int main()
 		ProcessCameraInput();
 		
 		// Modify light here
-		// light->SetColor(glm::vec3(sin(glfwGetTime() * 2.0f), sin(glfwGetTime() * 0.7f), sin(glfwGetTime() * 1.3f)));
+		// light->SetAmbient(glm::vec3(sin(glfwGetTime() * 2.0f), sin(glfwGetTime() * 0.7f), sin(glfwGetTime() * 1.3f)));
 		// light->SetPosition(glm::vec3(2 * sin(glfwGetTime()), 4.0f, 2 * cos(glfwGetTime())));
-		defaultSphere->SetPosition(imGui.GetObjectPosition());
-		defaultSphere->SetAmbient(imGui.GetObjectAmbient());
-		defaultSphere->SetDiffuse(imGui.GetObjectDiffuse());
-		defaultSphere->SetSpecular(imGui.GetObjectSpecular());
-		defaultSphere->SetShininess(imGui.GetObjectShininess());
+		defaultObject->SetPosition(imGui.GetObjectPosition());
+		defaultObject->SetShininess(imGui.GetObjectShininess());
 		light->SetPosition(imGui.GetLightPosition());
+		light->SetAmbient(imGui.GetLightAmbient());
+		light->SetDiffuse(imGui.GetLightDiffuse());
+		light->SetSpecular(imGui.GetLightSpecular());
 
 		light->Update();
 		scene.Update();
@@ -172,12 +176,14 @@ int main()
 	}
 
 	// Free heap
-	delete defaultSphere;
+	delete defaultObject;
 	delete light;
 	delete cubeMesh;
 	delete sphereMesh;
 	delete sphereVertices;
 	delete metallicBoxTex;
+	delete metallicBoxSpecularTex;
+	delete emissionTex;
 	delete defaultMaterial;
 	delete lightMaterial;
 	delete gouraudShader;

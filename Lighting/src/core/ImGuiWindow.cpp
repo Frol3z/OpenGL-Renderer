@@ -48,13 +48,12 @@ void ImGuiWindow::Update(bool isCursorDisabled)
 
 	ImGui::SeparatorText("Object");
 	ImGui::SliderFloat3("O. position", m_ObjectPosition, -10.0f, 10.0f);
-	ImGui::ColorEdit3("O. ambient", m_ObjectAmbient);
-	ImGui::ColorEdit3("O. diffuse", m_ObjectDiffuse);
-	ImGui::ColorEdit3("O. specular", m_ObjectSpecular);
 	ImGui::SliderFloat("O. shininess", &m_ObjectShininess, 0.0f, 256.0f);
 
 	ImGui::SeparatorText("Light");
-	ImGui::SliderFloat3("L. position", m_LightPosition, -10.0f, 10.0f);
+	ImGui::SliderFloat3("Light position", m_LightPosition, -10.0f, 10.0f);
+	ImGui::ColorEdit3("Light color", m_LightColor);
+	ImGui::SliderFloat("Light intensity", &m_LightIntensity, 0.0f, 1.0f);
 
 	ImGui::End();
 

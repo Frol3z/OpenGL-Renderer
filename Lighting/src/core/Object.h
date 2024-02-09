@@ -25,9 +25,13 @@ public:
 	void SetRotation(float degree, glm::vec3 rotation);
 	void SetScale(glm::vec3 scale);
 	void SetTexture(Texture* texture);
+	void SetSpecularTexture(Texture* texture);
+	void SetEmissionMap(Texture* texture);
 
 	void SetLightPosition(glm::vec3 position);
-	void SetLightColor(glm::vec3 color);
+	void SetLightAmbient(glm::vec3 ambient);
+	void SetLightDiffuse(glm::vec3 diffuse);
+	void SetLightSpecular(glm::vec3 specular);
 
 protected:
 	Mesh* m_Mesh;
@@ -44,7 +48,11 @@ protected:
 	glm::vec3 m_Position;
 
 	Texture* m_Texture;
+	Texture* m_SpecularTexture;
+	Texture* m_EmissionMap;
 
 	glm::vec3 m_LightPosition;
-	glm::vec3 m_LightColor;
+	glm::vec3 m_LightAmbient;
+	glm::vec3 m_LightDiffuse;
+	glm::vec3 m_LightSpecular;
 };
