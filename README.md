@@ -1,3 +1,3 @@
 # Learn OpenGL
 
-Some projects I'm working on for learning OpenGL and graphics programming :)
+Some C++ projects I'm working on in order to learn OpenGL and graphics programming :)
