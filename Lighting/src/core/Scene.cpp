@@ -1,39 +1,26 @@
 #include "Scene.h"
 
-#include <glad/glad.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
-#include "Camera.h"
-#include "Object.h"
-
-#include <iostream>
-
-Scene::Scene()
+Scene::Scene() :
+	m_Camera(Camera(CAMERA_RES_WIDTH, CAMERA_RES_HEIGHT, glm::vec3(0.0f, 0.0f, 3.0f)))
 {
-	m_Camera = new Camera(WIDTH, HEIGHT, glm::vec3(0.0f, 0.0f, 3.0f));
 }
 
-Scene::~Scene()
+void Scene::Draw()
 {
-	delete m_Camera;
-}
-
-void Scene::Update()
-{
-	glm::mat4 view = m_Camera->GetViewMatrix();
-	glm::mat4 projection = m_Camera->GetProjectionMatrix();
+	/* 
+		For every object I need to :
+			- update the view and projection matrices;
+			- tell it the properties of the directional light that is affecting it (may change);
+			- also point and spot lights;
+			- finally draw.
+	*/
 
 	for (auto& object : m_Objects)
 	{
-		object->SetViewAndProjectionMatrix(view, projection);
-	}
-}
-
-void Scene::Draw() const
-{
-	for (auto& object : m_Objects)
-	{
+		object->SetViewAndProjectionMatrix(m_Camera.GetViewMatrix(), m_Camera.GetProjectionMatrix());
+		object->SetDirectionalLight(m_DirLight.GetDirection(), m_DirLight.GetAmbient(), m_DirLight.GetDiffuse(), m_DirLight.GetSpecular());
 		object->Draw();
 	}
 }

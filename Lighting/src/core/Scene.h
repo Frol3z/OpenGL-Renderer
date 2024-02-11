@@ -2,26 +2,29 @@
 
 #include <vector>
 
-#define WIDTH 1280
-#define HEIGHT 720
+#include "Camera.h"
+#include "light/DirectionalLight.hpp"
+#include "Object.h"
 
-class Camera;
-class Object;
+#define CAMERA_RES_WIDTH 1920	
+#define CAMERA_RES_HEIGHT 1080
 
 class Scene
 {
 public:
+	// Constructor
 	Scene();
-	~Scene();
 
-	void Update();
-	void Draw() const;
+	void Draw();
+
 	void AddObject(Object* obj);
 	void RemoveObject();
 
-	inline Camera* GetCamera() const { return m_Camera; };
+	inline Camera& GetCamera() { return m_Camera; }
+	inline DirectionalLight& GetDirectionalLight() { return m_DirLight; }
 
 private:
-	Camera* m_Camera;
+	Camera m_Camera;
+	DirectionalLight m_DirLight;
 	std::vector<Object*> m_Objects;
 };

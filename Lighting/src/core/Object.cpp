@@ -44,14 +44,14 @@ void Object::Draw() const
 		glActiveTexture(GL_TEXTURE0);
 		m_Texture->Use();
 
-		m_Shader->SetInt("material.diffuse", 0);
+		m_Shader->SetInt("u_material.diffuse", 0);
 
 		if (m_SpecularTexture)
 		{
 			glActiveTexture(GL_TEXTURE1);
 			m_SpecularTexture->Use();
 
-			m_Shader->SetInt("material.specular", 1);
+			m_Shader->SetInt("u_material.specular", 1);
 		}
 
 		if (m_EmissionMap)
@@ -59,24 +59,18 @@ void Object::Draw() const
 			glActiveTexture(GL_TEXTURE2);
 			m_EmissionMap->Use();
 
-			m_Shader->SetInt("material.emission", 2);
+			m_Shader->SetInt("u_material.emission", 2);
 		}
 	}
 
 	// Vertex shader uniforms
-	m_Shader->SetMat4("model", m_TranslationTransform * m_RotationTransform  * m_ScaleTransform);
-	m_Shader->SetMat4("view", m_ViewTransform);
-	m_Shader->SetMat4("projection", m_ProjectionTransform);
+	m_Shader->SetMat4("u_model", m_TranslationTransform * m_RotationTransform  * m_ScaleTransform);
+	m_Shader->SetMat4("u_view", m_ViewTransform);
+	m_Shader->SetMat4("u_projection", m_ProjectionTransform);
 
-	m_Shader->SetFloat("material.shininess", m_Material->shininess);
+	m_Shader->SetFloat("u_material.shininess", m_Material->shininess);
 
-	// Fragment shader light uniforms
-	m_Shader->SetVec3("light.position", m_ViewTransform * glm::vec4(m_LightPosition, 1.0f));
-	m_Shader->SetVec3("light.ambient", m_LightAmbient);
-	m_Shader->SetVec3("light.diffuse", m_LightDiffuse);
-	m_Shader->SetVec3("light.specular", m_LightSpecular);
-
-	m_Shader->SetFloat("time", 3 * glfwGetTime());
+	m_Shader->SetFloat("u_time", 3 * glfwGetTime());
 
 	// Rendering geometry
 	size_t indicesCount = m_Mesh->GetIndicesCount();
@@ -113,7 +107,7 @@ void Object::SetShininess(float shininess)
 	m_Material->shininess = shininess;
 }
 
-void Object::SetViewAndProjectionMatrix(glm::mat4 view, glm::mat4 proj)
+void Object::SetViewAndProjectionMatrix(const glm::mat4& view, const glm::mat4& proj)
 {
 	m_ViewTransform = view;
 	m_ProjectionTransform = proj;
@@ -153,22 +147,12 @@ void Object::SetEmissionMap(Texture* texture)
 	m_EmissionMap = texture;
 }
 
-void Object::SetLightPosition(glm::vec3 position)
+void Object::SetDirectionalLight(glm::vec3&& direction, glm::vec3&& ambient, glm::vec3&& diffuse, glm::vec3&& specular)
 {
-	m_LightPosition = position;
-}
+	m_Shader->Use();
 
-void Object::SetLightAmbient(glm::vec3 ambient)
-{
-	m_LightAmbient = ambient;
-}
-
-void Object::SetLightDiffuse(glm::vec3 diffuse)
-{
-	m_LightDiffuse = diffuse;
-}
-
-void Object::SetLightSpecular(glm::vec3 specular)
-{
-	m_LightSpecular = specular;
+	m_Shader->SetVec3("u_dirLight.direction", m_ViewTransform * glm::vec4(direction, 0.0f));
+	m_Shader->SetVec3("u_dirLight.ambient", ambient);
+	m_Shader->SetVec3("u_dirLight.diffuse", diffuse);
+	m_Shader->SetVec3("u_dirLight.specular", specular);
 }

@@ -6,20 +6,26 @@
 
 #include <iostream>
 #include <sstream>
+#include <memory>
 
 #include "core/timer/Timer.h"
 #include "core/Object.h"
-#include "core/Light.h"
 #include "core/Camera.h"
 #include "core/Scene.h"
 #include "vendor/cubesphere/Cubesphere.h"
 #include "core/ImGuiWindow.h"
+
+#include "core/light/DirectionalLight.hpp"
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/string_cast.hpp>
 
 // Preprocessors
 #define WINDOW_TITLE "OpenGL Renderer"
 #define WINDOW_WIDTH 1280
 #define WINDOW_HEIGHT 720
 #define LOG(x) std::cout << x << std::endl
+#define LOG_GLM(x) LOG(glm::to_string(x).c_str())
 
 // Global variables
 ImGuiWindow imGui;
@@ -27,7 +33,9 @@ GLFWwindow* window;
 bool isFullscreen = false;
 
 Timer& timer = Timer::Get();
-Scene scene;
+std::unique_ptr<Scene> scene = std::make_unique<Scene>();
+Camera& camera = scene->GetCamera();
+DirectionalLight& dirLight = scene->GetDirectionalLight();
 
 Material* defaultMaterial = new Material(glm::vec3(1.0f, 0.5f, 0.31f), glm::vec3(1.0f, 0.5f, 0.31f), glm::vec3(1.0f), 32.0f);
 Material* lightMaterial = new Material(glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f), 32.0f);
@@ -116,25 +124,19 @@ int main()
 	Mesh* sphereMesh = new Mesh(sphereVertices, sphereVerticesSize, VertexLayout::VFNF, sphere.getIndices(), sphere.getIndexSize());
 
 	Shader* gouraudShader = new Shader("res/shaders/gouraud.vert", "res/shaders/gouraud.frag");
-	Shader* phongShader = new Shader("res/shaders/shader.vert", "res/shaders/phong.frag");
+	Shader* phongShader = new Shader("res/shaders/shader.vert", "res/shaders/shader.frag");
 	Shader* lightShader = new Shader("res/shaders/shader.vert", "res/shaders/light.frag");
 
 	Texture* metallicBoxTex = new Texture("res/textures/container.png");
 	Texture* metallicBoxSpecularTex = new Texture("res/textures/container_specular.png");
 	Texture* emissionTex = new Texture("res/textures/container_emission_2.png");
 
-	Object* defaultObject = new Object(cubeMesh, phongShader, defaultMaterial);
+	std::unique_ptr<Object> defaultObject = std::make_unique<Object>(cubeMesh, phongShader, defaultMaterial);
 	defaultObject->SetTexture(metallicBoxTex);
 	defaultObject->SetSpecularTexture(metallicBoxSpecularTex);
 	defaultObject->SetEmissionMap(emissionTex);
-
-	Light* light = new Light(sphereMesh, lightShader, lightMaterial);
-	light->SetPosition(glm::vec3(2.0f, 4.0f, 2.0f));
-	light->SetScale(glm::vec3(0.2f));
-	light->AddAffected(defaultObject);
 	
-	scene.AddObject(defaultObject);
-	scene.AddObject(light);
+	scene->AddObject(defaultObject.get());
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -142,33 +144,34 @@ int main()
 	{
 		glfwPollEvents();
 
-		// ImGui
-		imGui.Update(isCursorDisabled);
-
 		// Timer
 		timer.Update(glfwGetTime());
 		UpdatePerformanceDisplay();
+
+		// ImGui
+		imGui.Update(isCursorDisabled);
+
+		camera.SetSpeed(imGui.GetCameraSpeed());
+		camera.SetSensitivity(imGui.GetCameraSensitivity());
 		
 		// Process WASD inputs
 		ProcessCameraInput();
 		
 		// Modify light here
-		// light->SetAmbient(glm::vec3(sin(glfwGetTime() * 2.0f), sin(glfwGetTime() * 0.7f), sin(glfwGetTime() * 1.3f)));
-		// light->SetPosition(glm::vec3(2 * sin(glfwGetTime()), 4.0f, 2 * cos(glfwGetTime())));
 		defaultObject->SetPosition(imGui.GetObjectPosition());
 		defaultObject->SetShininess(imGui.GetObjectShininess());
-		light->SetPosition(imGui.GetLightPosition());
-		light->SetAmbient(imGui.GetLightAmbient());
-		light->SetDiffuse(imGui.GetLightDiffuse());
-		light->SetSpecular(imGui.GetLightSpecular());
 
-		light->Update();
-		scene.Update();
+		dirLight.SetDirection(imGui.GetDirLightDirection());
+		dirLight.SetAmbient(imGui.GetDirLightAmbient());
+		dirLight.SetDiffuse(imGui.GetDirLightDiffuse());
+		dirLight.SetSpecular(imGui.GetDirLightSpecular());
+
+		// scene->Update();
 
 		ClearBuffers();
 
 		// Draw
-		scene.Draw();
+		scene->Draw();
 		CheckOpenGLErrors();
 		imGui.Render();
 
@@ -176,8 +179,6 @@ int main()
 	}
 
 	// Free heap
-	delete defaultObject;
-	delete light;
 	delete cubeMesh;
 	delete sphereMesh;
 	delete sphereVertices;
@@ -263,23 +264,21 @@ static void UpdatePerformanceDisplay()
 
 static void ProcessCameraInput()
 {
-	auto* camera = scene.GetCamera();
-
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
-		camera->ProcessKeyboard(CameraMovement::FORWARD, timer.GetDeltaTime());
+		camera.ProcessKeyboard(CameraMovement::FORWARD, timer.GetDeltaTime());
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 	{
-		camera->ProcessKeyboard(CameraMovement::BACKWARD, timer.GetDeltaTime());
+		camera.ProcessKeyboard(CameraMovement::BACKWARD, timer.GetDeltaTime());
 	}
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
-		camera->ProcessKeyboard(CameraMovement::LEFT, timer.GetDeltaTime());
+		camera.ProcessKeyboard(CameraMovement::LEFT, timer.GetDeltaTime());
 	}
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	{
-		camera->ProcessKeyboard(CameraMovement::RIGHT, timer.GetDeltaTime());
+		camera.ProcessKeyboard(CameraMovement::RIGHT, timer.GetDeltaTime());
 	}
 }
 
@@ -354,8 +353,6 @@ static void OnKeyboard(GLFWwindow* window, int key, int scancode, int action, in
 
 static void OnMouse(GLFWwindow* window, double xpos, double ypos)
 {
-	auto* camera = scene.GetCamera();
-
 	if (isFirstMouse)
 	{
 		lastX = xpos;
@@ -369,17 +366,13 @@ static void OnMouse(GLFWwindow* window, double xpos, double ypos)
 	lastY = ypos;
 		
 	if (isCursorDisabled)
-		camera->ProcessMouseMovement(xOffset, yOffset);
+		camera.ProcessMouseMovement(xOffset, yOffset);
 }
 
 static void OnScroll(GLFWwindow* window, double xoffset, double yoffset)
 {
 	if (isCursorDisabled)
-	{
-		auto* camera = scene.GetCamera();
-
-		camera->UpdateFOV(yoffset);
-	}
+		camera.UpdateFOV(yoffset);
 }
 
 static void OnResize(GLFWwindow* window, int width, int height)

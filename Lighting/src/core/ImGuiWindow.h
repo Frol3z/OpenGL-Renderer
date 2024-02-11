@@ -5,11 +5,12 @@
 class ImGuiWindow
 {
 public:
-	ImGuiWindow() 
-		: m_ObjectPosition{0.0f, 0.0f, 0.0f}, 
+	ImGuiWindow() : 
+		m_CameraSpeed(5.0f), m_CameraSensitivity(0.1f),
+		m_DirLightDirection{ -0.2f, -1.0f, -0.3f }, m_DirLightColor{ 1.0f, 1.0f, 1.0f }, m_DirLightAmbient(0.2f), m_DirLightDiffuse(0.5f),
+		m_ObjectPosition{0.0f, 0.0f, 0.0f}, 
 		m_ObjectAmbient { 1.0f, 0.5f, 0.31f }, m_ObjectDiffuse{ 1.0f, 0.5f, 0.31f },
-		m_ObjectSpecular {0.5f, 0.5f, 0.5f}, m_ObjectShininess(32.0f),
-		m_LightPosition { 2.0f, 1.0f, 1.0f }, m_LightColor {1.0f, 1.0f, 1.0f}, m_LightIntensity(0.2f)
+		m_ObjectSpecular {0.5f, 0.5f, 0.5f}, m_ObjectShininess(32.0f)
 	{};
 
 public:
@@ -43,34 +44,33 @@ public:
 		return m_ObjectShininess;
 	};
 
-	inline glm::vec3 GetLightPosition() const
-	{
-		return glm::vec3(m_LightPosition[0], m_LightPosition[1], m_LightPosition[2]);
-	};
 
-	inline glm::vec3 GetLightAmbient() const
-	{
-		return glm::vec3(m_LightIntensity * m_LightColor[0], m_LightIntensity * m_LightColor[1], m_LightIntensity * m_LightColor[1]);
-	};
 
-	inline glm::vec3 GetLightDiffuse() const
-	{
-		return glm::vec3(m_LightColor[0], m_LightColor[1], m_LightColor[2]);
-	};
+	/* ---------- Camera ---------- */
+	inline const float GetCameraSpeed() const { return m_CameraSpeed; }
+	inline const float GetCameraSensitivity() const { return m_CameraSensitivity; }
 
-	inline glm::vec3 GetLightSpecular() const
-	{
-		return glm::vec3(m_LightColor[0], m_LightColor[1], m_LightColor[2]);
-	};
+	/* ---------- Directional Light ---------- */
+	inline glm::vec3 GetDirLightDirection() const { return glm::vec3(m_DirLightDirection[0], m_DirLightDirection[1], m_DirLightDirection[2]); }
+	inline glm::vec3 GetDirLightAmbient() const { return glm::vec3(m_DirLightAmbient * m_DirLightColor[0], m_DirLightAmbient * m_DirLightColor[1], m_DirLightAmbient * m_DirLightColor[1]); }
+	inline glm::vec3 GetDirLightDiffuse() const { return glm::vec3(m_DirLightDiffuse * m_DirLightColor[0], m_DirLightDiffuse * m_DirLightColor[1], m_DirLightDiffuse * m_DirLightColor[2]); }
+	inline glm::vec3 GetDirLightSpecular() const { return glm::vec3(m_DirLightColor[0], m_DirLightColor[1], m_DirLightColor[2]); }
 
 private:
+
+	/* ---------- Camera ---------- */
+	float m_CameraSpeed;
+	float m_CameraSensitivity;
+
+	/* ---------- Directional Light ---------- */
+	float m_DirLightDirection[3];
+	float m_DirLightColor[3];
+	float m_DirLightAmbient;
+	float m_DirLightDiffuse;
+
 	float m_ObjectPosition[3];
 	float m_ObjectAmbient[3];
 	float m_ObjectDiffuse[3];
 	float m_ObjectSpecular[3];
 	float m_ObjectShininess;
-
-	float m_LightPosition[3];
-	float m_LightColor[3];
-	float m_LightIntensity;
 };

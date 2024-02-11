@@ -1,32 +1,18 @@
 #include "Camera.h"
 
-#include <iostream>
-
-Camera::Camera(const float width, const float height, glm::vec3 position, glm::vec3 up)
-	: m_Front(glm::vec3(0.0f, 0.0f, -1.0f)), m_Yaw(YAW), m_Pitch(PITCH),
-	  m_Width(width), m_Height(height), m_FieldOfView(FOV),
-	  m_ProjectionMatrix(glm::perspective(glm::radians(FOV), (float)(width / height), 0.1f, 100.0f)),
-	  m_MovementSpeed(SPEED), m_MouseSensitivity(SENSITIVITY)
+Camera::Camera(unsigned int width, unsigned int height, glm::vec3 position, glm::vec3 up) :
+	  m_Position(position), m_WorldUp(up), m_Front(glm::vec3(0.0f)),
+	  m_Yaw(DEFAULT_YAW), m_Pitch(DEFAULT_PITCH),
+	  m_Width(width), m_Height(height), m_FieldOfView(DEFAULT_FOV),
+	  m_ProjectionMatrix(glm::perspective(glm::radians(DEFAULT_FOV), (float) width / height, 0.1f, 100.0f)),
+	  m_Speed(5.0f), m_Sensitivity(0.1f)
 {
-	m_Position = position;
-	m_WorldUp = up;
 	UpdateCameraVectors();
-}
-
-glm::mat4 Camera::GetViewMatrix() const
-{
-	// m_Position + m_Front = position of what the camera is looking at
-	return glm::lookAt(m_Position, m_Position + m_Front, m_Up);
-}
-
-glm::mat4 Camera::GetProjectionMatrix() const
-{
-	return m_ProjectionMatrix;
 }
 
 void Camera::ProcessKeyboard(CameraMovement direction, float deltaTime)
 {
-	float velocity = m_MovementSpeed * deltaTime;
+	float velocity = m_Speed * deltaTime;
 	switch (direction)
 	{
 		case FORWARD:
@@ -57,8 +43,8 @@ void Camera::ProcessKeyboard(CameraMovement direction, float deltaTime)
 
 void Camera::ProcessMouseMovement(float xOffset, float yOffset, bool constrainPitch)
 {
-	xOffset *= SENSITIVITY;
-	yOffset *= SENSITIVITY;
+	xOffset *= m_Sensitivity;
+	yOffset *= m_Sensitivity;
 
 	m_Yaw += xOffset;
 	m_Pitch += yOffset;
@@ -83,7 +69,7 @@ void Camera::UpdateFOV(float offset)
 	if (m_FieldOfView > 45.0f)
 		m_FieldOfView = 45.0f;
 
-	m_ProjectionMatrix = glm::perspective(glm::radians(m_FieldOfView), (float)(m_Width / m_Height), 0.1f, 100.0f);
+	m_ProjectionMatrix = glm::perspective(glm::radians(m_FieldOfView), (float) m_Width / m_Height, 0.1f, 100.0f);
 }
 
 void Camera::UpdateCameraVectors()
@@ -96,4 +82,25 @@ void Camera::UpdateCameraVectors()
 
 	m_Right = glm::normalize(glm::cross(m_Front, m_WorldUp));
 	m_Up = glm::normalize(glm::cross(m_Right, m_Front));
+}
+
+const glm::mat4 Camera::GetViewMatrix() const
+{
+	// m_Position + m_Front = position of what the camera is looking at
+	return glm::lookAt(m_Position, m_Position + m_Front, m_Up);
+}
+
+const glm::mat4 Camera::GetProjectionMatrix() const
+{
+	return m_ProjectionMatrix;
+}
+
+void Camera::SetSpeed(const float speed)
+{
+	m_Speed = speed;
+}
+
+void Camera::SetSensitivity(const float sensitivity)
+{
+	m_Sensitivity = sensitivity;
 }

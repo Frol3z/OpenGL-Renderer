@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\core\light\DirectionalLight.hpp" />
     <ClInclude Include="src\core\Texture.h" />
     <ClInclude Include="src\vendor\imgui\imconfig.h" />
     <ClInclude Include="src\vendor\imgui\imgui.h" />
@@ -60,7 +61,6 @@
     <ClInclude Include="src\vendor\cubesphere\Cubesphere.h" />
     <ClInclude Include="src\core\ImGuiWindow.h" />
     <ClInclude Include="src\core\geometry\IndexBuffer.h" />
-    <ClInclude Include="src\core\Light.h" />
     <ClInclude Include="src\core\Material.h" />
     <ClInclude Include="src\core\geometry\Mesh.h" />
     <ClInclude Include="src\core\Object.h" />
@@ -82,7 +82,7 @@
     <None Include="res\shaders\gouraud.frag" />
     <None Include="res\shaders\gouraud.vert" />
     <None Include="res\shaders\light.frag" />
-    <None Include="res\shaders\phong.frag" />
+    <None Include="res\shaders\shader.frag" />
     <None Include="res\shaders\shader.vert" />
     <None Include="src\vendor\imgui\imgui.natstepfilter" />
   </ItemGroup>

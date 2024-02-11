@@ -20,7 +20,7 @@ public:
 	void SetDiffuse(glm::vec3 diffuse);
 	void SetSpecular(glm::vec3 specular);
 	void SetShininess(float shininess);
-	void SetViewAndProjectionMatrix(glm::mat4 view, glm::mat4 proj);
+	void SetViewAndProjectionMatrix(const glm::mat4& view, const glm::mat4& proj);
 	void SetPosition(glm::vec3 position);
 	void SetRotation(float degree, glm::vec3 rotation);
 	void SetScale(glm::vec3 scale);
@@ -28,10 +28,7 @@ public:
 	void SetSpecularTexture(Texture* texture);
 	void SetEmissionMap(Texture* texture);
 
-	void SetLightPosition(glm::vec3 position);
-	void SetLightAmbient(glm::vec3 ambient);
-	void SetLightDiffuse(glm::vec3 diffuse);
-	void SetLightSpecular(glm::vec3 specular);
+	void SetDirectionalLight(glm::vec3&& direction, glm::vec3&& ambient, glm::vec3&& diffuse, glm::vec3&& specular);
 
 protected:
 	Mesh* m_Mesh;
