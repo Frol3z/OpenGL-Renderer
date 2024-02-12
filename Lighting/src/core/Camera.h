@@ -34,6 +34,8 @@ public:
 	// Camera Settings Setters
 	void SetSpeed(const float speed);
 	void SetSensitivity(const float sensitivity);
+	inline const float GetSpeed() const { return m_Speed; }
+	inline const float GetSensitivity() const { return m_Sensitivity; }
 
 private:
 	void UpdateCameraVectors();

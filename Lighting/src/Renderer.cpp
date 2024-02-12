@@ -1,3 +1,4 @@
+#define GLAD_INCLUDED
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -13,7 +14,7 @@
 #include "core/Camera.h"
 #include "core/Scene.h"
 #include "vendor/cubesphere/Cubesphere.h"
-#include "core/ImGuiWindow.h"
+#include "core/imgui/ImGuiWindow.h"
 
 #include "core/light/DirectionalLight.hpp"
 
@@ -35,7 +36,6 @@ bool isFullscreen = false;
 Timer& timer = Timer::Get();
 std::unique_ptr<Scene> scene = std::make_unique<Scene>();
 Camera& camera = scene->GetCamera();
-DirectionalLight& dirLight = scene->GetDirectionalLight();
 
 Material* defaultMaterial = new Material(glm::vec3(1.0f, 0.5f, 0.31f), glm::vec3(1.0f, 0.5f, 0.31f), glm::vec3(1.0f), 32.0f);
 Material* lightMaterial = new Material(glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f), 32.0f);
@@ -120,8 +120,8 @@ int main()
 		-0.5f,  0.5f, -0.5f, 0.0f,  1.0f,  0.0f,  1.0f,  1.0f
 	};
 	
-	Mesh* cubeMesh = new Mesh(cubeVertices, sizeof(cubeVertices), VertexLayout::VFNFTF);
-	Mesh* sphereMesh = new Mesh(sphereVertices, sphereVerticesSize, VertexLayout::VFNF, sphere.getIndices(), sphere.getIndexSize());
+	std::shared_ptr<Mesh> cubeMesh = std::make_shared<Mesh>(cubeVertices, sizeof(cubeVertices), VertexLayout::VFNFTF);
+	std::shared_ptr<Mesh> sphereMesh = std::make_shared<Mesh>(sphereVertices, sphereVerticesSize, VertexLayout::VFNF, sphere.getIndices(), sphere.getIndexSize());
 
 	Shader* gouraudShader = new Shader("res/shaders/gouraud.vert", "res/shaders/gouraud.frag");
 	Shader* phongShader = new Shader("res/shaders/shader.vert", "res/shaders/shader.frag");
@@ -132,11 +132,16 @@ int main()
 	Texture* emissionTex = new Texture("res/textures/container_emission_2.png");
 
 	std::unique_ptr<Object> defaultObject = std::make_unique<Object>(cubeMesh, phongShader, defaultMaterial);
+	defaultObject->SetName("Default cube");
 	defaultObject->SetTexture(metallicBoxTex);
 	defaultObject->SetSpecularTexture(metallicBoxSpecularTex);
 	defaultObject->SetEmissionMap(emissionTex);
+
+	std::unique_ptr<Object> obj2 = std::make_unique<Object>(cubeMesh, phongShader, defaultMaterial);
+	obj2->SetPosition(glm::vec3(1.0f));
 	
 	scene->AddObject(defaultObject.get());
+	scene->AddObject(obj2.get());
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -149,24 +154,10 @@ int main()
 		UpdatePerformanceDisplay();
 
 		// ImGui
-		imGui.Update(isCursorDisabled);
-
-		camera.SetSpeed(imGui.GetCameraSpeed());
-		camera.SetSensitivity(imGui.GetCameraSensitivity());
+		imGui.Update(isCursorDisabled, scene.get());
 		
-		// Process WASD inputs
+		// Inputs
 		ProcessCameraInput();
-		
-		// Modify light here
-		defaultObject->SetPosition(imGui.GetObjectPosition());
-		defaultObject->SetShininess(imGui.GetObjectShininess());
-
-		dirLight.SetDirection(imGui.GetDirLightDirection());
-		dirLight.SetAmbient(imGui.GetDirLightAmbient());
-		dirLight.SetDiffuse(imGui.GetDirLightDiffuse());
-		dirLight.SetSpecular(imGui.GetDirLightSpecular());
-
-		// scene->Update();
 
 		ClearBuffers();
 
@@ -179,8 +170,6 @@ int main()
 	}
 
 	// Free heap
-	delete cubeMesh;
-	delete sphereMesh;
 	delete sphereVertices;
 	delete metallicBoxTex;
 	delete metallicBoxSpecularTex;

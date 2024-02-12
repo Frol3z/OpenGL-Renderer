@@ -31,7 +31,7 @@
     <ClCompile Include="src\vendor\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\core\Camera.cpp" />
     <ClCompile Include="src\vendor\cubesphere\Cubesphere.cpp" />
-    <ClCompile Include="src\core\ImGuiWindow.cpp" />
+    <ClCompile Include="src\core\imgui\ImGuiWindow.cpp" />
     <ClCompile Include="src\core\geometry\IndexBuffer.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\core\geometry\Mesh.cpp" />
@@ -59,7 +59,7 @@
     <ClInclude Include="src\light\Light.h" />
     <ClInclude Include="src\core\Camera.h" />
     <ClInclude Include="src\vendor\cubesphere\Cubesphere.h" />
-    <ClInclude Include="src\core\ImGuiWindow.h" />
+    <ClInclude Include="src\core\imgui\ImGuiWindow.h" />
     <ClInclude Include="src\core\geometry\IndexBuffer.h" />
     <ClInclude Include="src\core\Material.h" />
     <ClInclude Include="src\core\geometry\Mesh.h" />

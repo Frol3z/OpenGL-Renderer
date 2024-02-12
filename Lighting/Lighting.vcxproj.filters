@@ -72,7 +72,7 @@
     <ClCompile Include="src\vendor\imgui\imgui_demo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\ImGuiWindow.cpp">
+    <ClCompile Include="src\core\imgui\ImGuiWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\core\Texture.cpp">
@@ -173,7 +173,7 @@
     <ClInclude Include="src\core\Material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\ImGuiWindow.h">
+    <ClInclude Include="src\core\imgui\ImGuiWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\core\Texture.h">

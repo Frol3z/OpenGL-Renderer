@@ -1,6 +1,7 @@
 #include "Scene.h"
 
 #include <glm/glm.hpp>
+#include <iostream>
 
 Scene::Scene() :
 	m_Camera(Camera(CAMERA_RES_WIDTH, CAMERA_RES_HEIGHT, glm::vec3(0.0f, 0.0f, 3.0f)))
@@ -30,7 +31,12 @@ void Scene::AddObject(Object* obj)
 	m_Objects.push_back(obj);
 }
 
-void Scene::RemoveObject()
+void Scene::RemoveObject(Object* obj)
 {
-	m_Objects.pop_back();
+	auto it = std::find(m_Objects.begin(), m_Objects.end(), obj);
+
+	if (it != m_Objects.end())
+		m_Objects.erase(it);
+	else
+		std::cerr << "Object not found in the vector." << std::endl;
 }

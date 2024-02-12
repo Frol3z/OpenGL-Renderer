@@ -18,10 +18,11 @@ public:
 	void Draw();
 
 	void AddObject(Object* obj);
-	void RemoveObject();
+	void RemoveObject(Object* obj);
 
 	inline Camera& GetCamera() { return m_Camera; }
 	inline DirectionalLight& GetDirectionalLight() { return m_DirLight; }
+	inline std::vector<Object*>& GetObjects() { return m_Objects; }
 
 private:
 	Camera m_Camera;
