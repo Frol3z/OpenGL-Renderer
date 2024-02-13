@@ -16,23 +16,20 @@ public:
 	bool isUniformScaling;
 
 public:
-	Object(std::shared_ptr<Mesh> mesh, Shader* shader, Material* material);
+	Object(Mesh* mesh, Material* material, Shader* shader);
 
 	virtual void Draw() const;
 	
 	// Setters
 	void SetName(const std::string& name);
-	void SetMesh(std::shared_ptr<Mesh> mesh);
+	void SetMesh(Mesh* mesh);
+	void SetMaterial(Material* material);
+	void SetShader(Shader* shader);
 
 	void SetPosition(glm::vec3 position);
 	void SetRotation(glm::vec3 rotation);
 	void SetScale(glm::vec3 scale);
 
-	void SetMaterial(Material* material);
-	void SetAmbient(glm::vec3 ambient);
-	void SetDiffuse(glm::vec3 diffuse);
-	void SetSpecular(glm::vec3 specular);
-	void SetShininess(float shininess);
 	void SetViewAndProjectionMatrix(const glm::mat4& view, const glm::mat4& proj);
 	void SetTexture(Texture* texture);
 	void SetSpecularTexture(Texture* texture);
@@ -48,21 +45,22 @@ public:
 
 protected:
 	std::string m_Name;
-	std::shared_ptr<Mesh> m_Mesh;
 
-	glm::mat4 m_TranslationTransform;
-	glm::mat4 m_RotationTransform;
-	glm::mat4 m_ScaleTransform;
-
-	glm::mat4 m_ViewTransform;
-	glm::mat4 m_ProjectionTransform;
-
+	Mesh* m_Mesh;
 	Shader* m_Shader;
 	Material* m_Material;
 
 	glm::vec3 m_Position;
 	glm::vec3 m_Rotation;
 	glm::vec3 m_Scale;
+
+	// Model transform
+	glm::mat4 m_TranslationTransform;
+	glm::mat4 m_RotationTransform;
+	glm::mat4 m_ScaleTransform;
+
+	glm::mat4 m_ViewTransform;
+	glm::mat4 m_ProjectionTransform;
 
 	Texture* m_Texture;
 	Texture* m_SpecularTexture;

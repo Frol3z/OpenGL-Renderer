@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 enum VertexLayout {
 	VF = 0,
 	VFNF,
@@ -19,11 +21,16 @@ public:
 	size_t GetIndicesCount() const;
 	const unsigned int* GetIndices() const;
 
+	void SetName(const std::string& name) { m_Name = name; }
+	inline const std::string& GetName() const { return m_Name; }
+
 private:
 	class VertexArray* m_VA;
 	class VertexBuffer* m_VB;
 	class VertexBufferLayout* m_VBL;
 	class IndexBuffer* m_IB;
+
+	std::string m_Name;
 
 	size_t m_VertsCount;
 };

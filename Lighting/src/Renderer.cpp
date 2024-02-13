@@ -37,9 +37,6 @@ Timer& timer = Timer::Get();
 std::unique_ptr<Scene> scene = std::make_unique<Scene>();
 Camera& camera = scene->GetCamera();
 
-Material* defaultMaterial = new Material(glm::vec3(1.0f, 0.5f, 0.31f), glm::vec3(1.0f, 0.5f, 0.31f), glm::vec3(1.0f), 32.0f);
-Material* lightMaterial = new Material(glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f), 32.0f);
-
 float lastX = 0.0f;
 float lastY = 0.0f;
 bool isFirstMouse = true;
@@ -52,6 +49,7 @@ static void UpdatePerformanceDisplay();
 static void ProcessCameraInput();
 static void ClearBuffers();
 static void CheckOpenGLErrors();
+static void SceneSetup();
 
 static void OnResize(GLFWwindow* window, int width, int height);
 static void OnKeyboard(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -73,75 +71,23 @@ int main()
 	}
 	
 	// Data setup
-	Cubesphere sphere(1.0f, 3, true);
-	size_t sphereVerticesSize = 0;
-	const float* sphereVertices = Combine(sphere.getVertices(), sphere.getNormals(), sphere.getVertexCount(), sphereVerticesSize);
-	const float cubeVertices[] = {
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+	SceneSetup();
 
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+	/*
+		Shader* gouraudShader = new Shader("res/shaders/gouraud.vert", "res/shaders/gouraud.frag");
+		Shader* phongShader = new Shader("res/shaders/shader.vert", "res/shaders/shader.frag");
+		Shader* lightShader = new Shader("res/shaders/shader.vert", "res/shaders/light.frag");
 
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+		Texture* metallicBoxTex = new Texture("res/textures/container.png");
+		Texture* metallicBoxSpecularTex = new Texture("res/textures/container_specular.png");
+		Texture* emissionTex = new Texture("res/textures/container_emission_2.png");
 
-		 0.5f,  0.5f,  0.5f, 1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-		 0.5f, -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-		 0.5f, -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-		 0.5f, -0.5f,  0.5f, 1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f, 1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-		-0.5f, -0.5f, -0.5f, 0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-		 0.5f, -0.5f, -0.5f, 0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
-		 0.5f, -0.5f,  0.5f, 0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f, 0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-		-0.5f, -0.5f,  0.5f, 0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f, 0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-
-		-0.5f,  0.5f, -0.5f, 0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
-		 0.5f,  0.5f, -0.5f, 0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
-		-0.5f,  0.5f, -0.5f, 0.0f,  1.0f,  0.0f,  1.0f,  1.0f
-	};
-	
-	std::shared_ptr<Mesh> cubeMesh = std::make_shared<Mesh>(cubeVertices, sizeof(cubeVertices), VertexLayout::VFNFTF);
-	std::shared_ptr<Mesh> sphereMesh = std::make_shared<Mesh>(sphereVertices, sphereVerticesSize, VertexLayout::VFNF, sphere.getIndices(), sphere.getIndexSize());
-
-	Shader* gouraudShader = new Shader("res/shaders/gouraud.vert", "res/shaders/gouraud.frag");
-	Shader* phongShader = new Shader("res/shaders/shader.vert", "res/shaders/shader.frag");
-	Shader* lightShader = new Shader("res/shaders/shader.vert", "res/shaders/light.frag");
-
-	Texture* metallicBoxTex = new Texture("res/textures/container.png");
-	Texture* metallicBoxSpecularTex = new Texture("res/textures/container_specular.png");
-	Texture* emissionTex = new Texture("res/textures/container_emission_2.png");
-
-	std::unique_ptr<Object> defaultObject = std::make_unique<Object>(cubeMesh, phongShader, defaultMaterial);
-	defaultObject->SetName("Default cube");
-	defaultObject->SetTexture(metallicBoxTex);
-	defaultObject->SetSpecularTexture(metallicBoxSpecularTex);
-	defaultObject->SetEmissionMap(emissionTex);
-
-	std::unique_ptr<Object> obj2 = std::make_unique<Object>(cubeMesh, phongShader, defaultMaterial);
-	obj2->SetPosition(glm::vec3(1.0f));
-	
-	scene->AddObject(defaultObject.get());
-	scene->AddObject(obj2.get());
+		std::unique_ptr<Object> defaultObject = std::make_unique<Object>(cubeMesh, phongShader, defaultMaterial);
+		defaultObject->SetName("Default cube");
+		defaultObject->SetTexture(metallicBoxTex);
+		defaultObject->SetSpecularTexture(metallicBoxSpecularTex);
+		defaultObject->SetEmissionMap(emissionTex);
+	*/
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -168,17 +114,6 @@ int main()
 
 		glfwSwapBuffers(window);
 	}
-
-	// Free heap
-	delete sphereVertices;
-	delete metallicBoxTex;
-	delete metallicBoxSpecularTex;
-	delete emissionTex;
-	delete defaultMaterial;
-	delete lightMaterial;
-	delete gouraudShader;
-	delete phongShader;
-	delete lightShader;
 
 	Shutdown();
 	return 0;
@@ -253,21 +188,24 @@ static void UpdatePerformanceDisplay()
 
 static void ProcessCameraInput()
 {
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-	{
-		camera.ProcessKeyboard(CameraMovement::FORWARD, timer.GetDeltaTime());
-	}
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-	{
-		camera.ProcessKeyboard(CameraMovement::BACKWARD, timer.GetDeltaTime());
-	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-	{
-		camera.ProcessKeyboard(CameraMovement::LEFT, timer.GetDeltaTime());
-	}
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-	{
-		camera.ProcessKeyboard(CameraMovement::RIGHT, timer.GetDeltaTime());
+	if(isCursorDisabled)
+	{ 
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		{
+			camera.ProcessKeyboard(CameraMovement::FORWARD, timer.GetDeltaTime());
+		}
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		{
+			camera.ProcessKeyboard(CameraMovement::BACKWARD, timer.GetDeltaTime());
+		}
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		{
+			camera.ProcessKeyboard(CameraMovement::LEFT, timer.GetDeltaTime());
+		}
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		{
+			camera.ProcessKeyboard(CameraMovement::RIGHT, timer.GetDeltaTime());
+		}
 	}
 }
 
@@ -285,6 +223,86 @@ static void CheckOpenGLErrors()
 	}
 }
 
+static void SceneSetup()
+{
+	Cubesphere sphere(1.0f, 3, true);
+	size_t sphereVerticesSize = 0;
+	const float* sphereVertices = Combine(sphere.getVertices(), sphere.getNormals(), sphere.getVertexCount(), sphereVerticesSize);
+	const float cubeVertices[] = {
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+		 0.5f,  0.5f,  0.5f, 1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+		 0.5f, -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+		 0.5f, -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+		 0.5f, -0.5f,  0.5f, 1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f, 1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+		-0.5f, -0.5f, -0.5f, 0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+		 0.5f, -0.5f, -0.5f, 0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+		 0.5f, -0.5f,  0.5f, 0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f, 0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f, 0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, 0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+
+		-0.5f,  0.5f, -0.5f, 0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+		 0.5f,  0.5f, -0.5f, 0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+		-0.5f,  0.5f, -0.5f, 0.0f,  1.0f,  0.0f,  1.0f,  1.0f
+	};
+
+	// Meshes
+	std::unique_ptr<Mesh> cubeMesh = std::make_unique<Mesh>(cubeVertices, sizeof(cubeVertices), VertexLayout::VFNFTF);
+	cubeMesh->SetName("Cube");
+	
+	std::unique_ptr<Mesh> sphereMesh = std::make_unique<Mesh>(sphereVertices, sphereVerticesSize, VertexLayout::VFNF, sphere.getIndices(), sphere.getIndexSize());
+	sphereMesh->SetName("Sphere");
+
+	// Materials
+	std::unique_ptr<Material> material = std::make_unique<Material>(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.5f), 32.0f);
+	material->SetName("Default");
+
+	// Shaders
+	std::unique_ptr<Shader> shader = std::make_unique<Shader>("res/shaders/default.vert", "res/shaders/default.frag");
+	shader->SetName("Default");
+	std::unique_ptr<Shader> gouraud = std::make_unique<Shader>("res/shaders/gouraud.vert", "res/shaders/gouraud.frag");
+	gouraud->SetName("Gouraud");
+
+	// Objects
+	std::unique_ptr<Object> obj1 = std::make_unique<Object>(cubeMesh.get(), material.get(), shader.get());
+	obj1->SetName("Default cube");
+	// std::unique_ptr<Object> obj2 = std::make_unique<Object>(sphereMesh.get(), material.get(), shader.get());
+
+	scene->AddMesh(std::move(cubeMesh));
+	scene->AddMesh(std::move(sphereMesh));
+	scene->AddMaterial(std::move(material));
+	scene->AddShader(std::move(shader));
+	scene->AddShader(std::move(gouraud));
+	scene->AddObject(std::move(obj1));
+	// scene->AddObject(std::move(obj2));
+}
+
 static void OnKeyboard(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	switch (key)
@@ -297,6 +315,9 @@ static void OnKeyboard(GLFWwindow* window, int key, int scancode, int action, in
 	}
 	case GLFW_KEY_F:
 	{
+		if (!isCursorDisabled)
+			break;
+
 		if (action == GLFW_PRESS)
 		{
 			if (isFullscreen)
@@ -318,6 +339,9 @@ static void OnKeyboard(GLFWwindow* window, int key, int scancode, int action, in
 	}
 	case GLFW_KEY_G:
 	{
+		if (!isCursorDisabled)
+			break;
+
 		if (action == GLFW_PRESS)
 		{
 			// Toggle wireframe mode

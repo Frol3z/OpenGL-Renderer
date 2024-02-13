@@ -12,7 +12,7 @@ public:
 		m_Ambient(glm::vec3(0.2f)),
 		m_Diffuse(glm::vec3(0.5f)),
 		m_Specular(glm::vec3(1.0f)),
-		m_Intensity(0.2f)
+		m_Intensity(1.0f)
 	{
 	}
 

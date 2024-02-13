@@ -1,9 +1,10 @@
 #version 460 core
 
-layout (location = 0) in vec3 vPosition;
-layout (location = 1) in vec3 vNormal;
+in vec3 Normal;
+in vec2 TexCoord;
+in vec3 FragPosition;
 
-out vec3 Color;
+out vec4 FragColor;
 
 struct Material
 {
@@ -24,29 +25,22 @@ struct DirLight
 uniform Material u_material;
 uniform DirLight u_dirLight;
 
-uniform mat4 u_model;
-uniform mat4 u_view;
-uniform mat4 u_projection;
-
 vec3 CalcDirLight(DirLight dir, Material mat, vec3 normal, vec3 viewDir);
 
 void main()
 {
-	// Compute vertex position
-	gl_Position = u_projection * u_view * u_model * vec4(vPosition, 1.0);
-
-	// Gouraud shader
 	vec3 result = vec3(0.0);
-	vec3 norm = mat3(transpose(inverse(u_view * u_model))) * vNormal;
-	vec3 vertPosition = vec3(u_view * u_model * vec4(vPosition, 1.0));
-	vec3 viewDir = normalize(vec3(0.0) - vertPosition);
+
+	vec3 norm = normalize(Normal);
+	vec3 viewDir = normalize(vec3(0.0) - FragPosition);
 
 	result += CalcDirLight(u_dirLight, u_material, norm, viewDir);
 
 	// @todo Point lights
 	// @todo Spot lights
-	Color = result;
-};
+
+	FragColor = vec4(result, 1.0);
+}
 
 vec3 CalcDirLight(DirLight dir, Material mat, vec3 normal, vec3 viewDir)
 {

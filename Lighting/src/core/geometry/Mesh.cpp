@@ -8,7 +8,7 @@
 #include <iostream>
 
 Mesh::Mesh(const float* vertices, size_t vSize, VertexLayout layout, const unsigned int* indices, size_t iSize)
-	: m_VA(nullptr), m_VB(nullptr), m_VBL(nullptr), m_IB(nullptr), m_VertsCount(0)
+	: m_VA(nullptr), m_VB(nullptr), m_VBL(nullptr), m_IB(nullptr), m_Name("Mesh"), m_VertsCount(0)
 {
 	m_VA = new VertexArray();
 

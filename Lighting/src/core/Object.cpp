@@ -1,52 +1,16 @@
 #include "Object.h"
 
 #include <GLFW/glfw3.h>
-#include <iostream>
 
-Object::Object(std::shared_ptr<Mesh> mesh, Shader* shader, Material* material) :
-	  isUniformScaling(true), m_Name("Object"),
-	  m_TranslationTransform(glm::mat4(1.0f)), m_RotationTransform(glm::mat4(1.0f)), m_ScaleTransform(glm::mat4(1.0f)),
-	  m_ViewTransform(glm::mat4(1.0f)), m_ProjectionTransform(glm::mat4(1.0f)),
-	  m_Mesh(mesh), m_Shader(shader), m_Material(material), 
-	  m_Position(glm::vec3(0.0f)), m_Rotation(glm::vec3(0.0f)), m_Scale(glm::vec3(1.0f)),
-	  m_Texture(nullptr), m_SpecularTexture(nullptr), m_EmissionMap(nullptr)
+Object::Object(Mesh* mesh, Material* material, Shader* shader) :
+	m_Name("Object"), m_Mesh(mesh),
+	m_Material(material), m_Shader(shader),
+	m_Position(glm::vec3(0.0f)), m_Rotation(glm::vec3(0.0f)), m_Scale(glm::vec3(1.0f)),
+	m_TranslationTransform(glm::mat4(1.0f)), m_RotationTransform(glm::mat4(1.0f)), m_ScaleTransform(glm::mat4(1.0f)),
+	m_ViewTransform(glm::mat4(1.0f)), m_ProjectionTransform(glm::mat4(1.0f)),
+	m_Texture(nullptr), m_SpecularTexture(nullptr), m_EmissionMap(nullptr),
+	isUniformScaling(true)
 {
-}
-
-void Object::SetName(const std::string& name)
-{
-	m_Name = name;
-}
-
-void Object::SetMesh(std::shared_ptr<Mesh> mesh)
-{
-	m_Mesh = mesh;
-}
-
-void Object::SetPosition(glm::vec3 position)
-{
-	m_TranslationTransform = glm::mat4(1.0f);
-	m_TranslationTransform = glm::translate(m_TranslationTransform, position);
-	m_Position = position;
-}
-
-void Object::SetRotation(glm::vec3 rotation)
-{
-	m_RotationTransform = glm::mat4(1.0f);
-
-	m_RotationTransform =
-		glm::rotate(m_RotationTransform, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f)) *
-		glm::rotate(m_RotationTransform, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f)) *
-		glm::rotate(m_RotationTransform, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-
-	m_Rotation = rotation;
-}
-
-void Object::SetScale(glm::vec3 scale)
-{
-	m_ScaleTransform = glm::mat4(1.0f);
-	m_ScaleTransform = glm::scale(m_ScaleTransform, scale);
-	m_Scale = scale;
 }
 
 void Object::Draw() const
@@ -79,13 +43,16 @@ void Object::Draw() const
 	}
 
 	// Vertex shader uniforms
-	m_Shader->SetMat4("u_model", m_TranslationTransform * m_RotationTransform  * m_ScaleTransform);
+	m_Shader->SetMat4("u_model", m_TranslationTransform * m_RotationTransform * m_ScaleTransform);
 	m_Shader->SetMat4("u_view", m_ViewTransform);
 	m_Shader->SetMat4("u_projection", m_ProjectionTransform);
 
+	m_Shader->SetVec3("u_material.ambient", m_Material->ambient);
+	m_Shader->SetVec3("u_material.diffuse", m_Material->diffuse);
+	m_Shader->SetVec3("u_material.specular", m_Material->specular);
 	m_Shader->SetFloat("u_material.shininess", m_Material->shininess);
 
-	m_Shader->SetFloat("u_time", 3 * glfwGetTime());
+	// m_Shader->SetFloat("u_time", 3 * glfwGetTime());
 
 	// Rendering geometry
 	size_t indicesCount = m_Mesh->GetIndicesCount();
@@ -95,31 +62,52 @@ void Object::Draw() const
 		glDrawArrays(GL_TRIANGLES, 0, m_Mesh->GetVertsCount());
 
 	m_Mesh->Unbind();
-} 
+}
+
+void Object::SetName(const std::string& name)
+{
+	m_Name = name;
+}
+
+void Object::SetMesh(Mesh* mesh)
+{
+	m_Mesh = mesh;
+}
 
 void Object::SetMaterial(Material* material)
 {
 	m_Material = material;
 }
 
-void Object::SetAmbient(glm::vec3 ambient)
+void Object::SetShader(Shader* shader)
 {
-	m_Material->ambient = ambient;
+	m_Shader = shader;
 }
 
-void Object::SetDiffuse(glm::vec3 diffuse)
+void Object::SetPosition(glm::vec3 position)
 {
-	m_Material->diffuse = diffuse;
+	m_TranslationTransform = glm::mat4(1.0f);
+	m_TranslationTransform = glm::translate(m_TranslationTransform, position);
+	m_Position = position;
 }
 
-void Object::SetSpecular(glm::vec3 specular)
+void Object::SetRotation(glm::vec3 rotation)
 {
-	m_Material->specular = specular;
+	m_RotationTransform = glm::mat4(1.0f);
+
+	m_RotationTransform =
+		glm::rotate(m_RotationTransform, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f)) *
+		glm::rotate(m_RotationTransform, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f)) *
+		glm::rotate(m_RotationTransform, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+
+	m_Rotation = rotation;
 }
 
-void Object::SetShininess(float shininess)
+void Object::SetScale(glm::vec3 scale)
 {
-	m_Material->shininess = shininess;
+	m_ScaleTransform = glm::mat4(1.0f);
+	m_ScaleTransform = glm::scale(m_ScaleTransform, scale);
+	m_Scale = scale;
 }
 
 void Object::SetViewAndProjectionMatrix(const glm::mat4& view, const glm::mat4& proj)

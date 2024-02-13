@@ -36,6 +36,10 @@ class Shader
         void SetMat3(const std::string& name, const glm::mat3& mat) const;
         void SetMat4(const std::string& name, const glm::mat4& mat) const;
 
+		void SetName(const std::string& name) { m_Name = name; }
+		inline const std::string& GetName() const { return m_Name; }
+
 	private:
 		unsigned int program;
+		std::string m_Name;
 };

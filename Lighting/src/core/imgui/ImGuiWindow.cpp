@@ -50,10 +50,24 @@ void ImGuiWindow::Update(bool isCursorDisabled, Scene* scene)
 	// The actual ImGui window's layout
 	ImGui::Begin("ImGui");
 
-	/* ---------- Camera ---------- */
-	ImGui::SeparatorText("Camera");
+	CreateCameraUI(scene->GetCamera());
+	CreateDirectionalLightUI(scene->GetDirectionalLight());
+	CreateObjectsUI(scene);
 
-	auto& camera = scene->GetCamera();
+	ImGui::End();
+
+	ImGui::ShowDemoWindow();
+}
+
+void ImGuiWindow::Render() const
+{
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void ImGuiWindow::CreateCameraUI(Camera& camera)
+{
+	ImGui::SeparatorText("Camera");
 
 	// Speed
 	float speed = camera.GetSpeed();
@@ -64,11 +78,11 @@ void ImGuiWindow::Update(bool isCursorDisabled, Scene* scene)
 	float sensitivity = camera.GetSensitivity();
 	if (ImGui::SliderFloat("Sensitivity", &sensitivity, 0.001f, 5.0f))
 		camera.SetSensitivity(sensitivity);
+}
 
+void ImGuiWindow::CreateDirectionalLightUI(DirectionalLight& dirLight)
+{
 	ImGui::SeparatorText("Lights");
-
-	/* ---------- Directional Light ---------- */
-	auto& dirLight = scene->GetDirectionalLight();
 
 	// Direction
 	float direction[3] = { dirLight.GetDirection().x, dirLight.GetDirection().y, dirLight.GetDirection().z };
@@ -79,8 +93,9 @@ void ImGuiWindow::Update(bool isCursorDisabled, Scene* scene)
 	float intensity = dirLight.GetIntensity();
 	const float ambStrength = 0.2f;
 	const float difStrength = 0.5f;
+
 	// Color
-	if(ImGui::ColorEdit3("Color", color))
+	if (ImGui::ColorEdit3("Color", color))
 	{
 		dirLight.SetColor(glm::vec3(color[0], color[1], color[2]));
 		dirLight.SetAmbient(glm::vec3(intensity * ambStrength * color[0], intensity * ambStrength * color[1], intensity * ambStrength * color[2]));
@@ -94,24 +109,64 @@ void ImGuiWindow::Update(bool isCursorDisabled, Scene* scene)
 		dirLight.SetIntensity(intensity);
 		dirLight.SetAmbient(glm::vec3(intensity * ambStrength * color[0], intensity * ambStrength * color[1], intensity * ambStrength * color[2]));
 		dirLight.SetDiffuse(glm::vec3(intensity * difStrength * color[0], intensity * difStrength * color[1], intensity * difStrength * color[2]));
+		dirLight.SetSpecular(glm::vec3(intensity * color[0], intensity * color[1], intensity * color[2]));
 	}
+}
 
-	/* ---------- Scene ---------- */
+void ImGuiWindow::CreateObjectsUI(Scene* scene)
+{
 	ImGui::SeparatorText("Scene");
 
 	auto& objects = scene->GetObjects();
-	
+
 	// Add object button
 	ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 100);
 	if (ImGui::Button("Add object"))
+		ImGui::OpenPopup("New object");
+
+	// Add object modal
+	if (ImGui::BeginPopupModal("New object", NULL, ImGuiWindowFlags_AlwaysAutoResize)) 
 	{
-		// @todo
-		std::cout << "Add object" << std::endl;
+		ImGui::InputText("Name", m_Buffer, sizeof(m_Buffer));
+
+		CreateCombobox(scene->GetMeshes(), &m_SelectedMesh, "Mesh");
+		CreateCombobox(scene->GetMaterials(), &m_SelectedMaterial, "Material");
+		CreateCombobox(scene->GetShaders(), &m_SelectedShader, "Shader");
+
+		// Confirm button
+		if (ImGui::Button("OK"))
+		{
+			// Creating the new object
+			std::unique_ptr<Object> newObject = std::make_unique<Object>(
+				scene->GetMeshes().at(m_SelectedMesh).get(),
+				scene->GetMaterials().at(m_SelectedMaterial).get(),
+				scene->GetShaders().at(m_SelectedShader).get()
+			);
+
+			newObject->SetName(std::string(m_Buffer));
+
+			scene->AddObject(std::move(newObject));
+
+			m_SelectedMesh = 0;
+			m_SelectedMaterial = 0;
+			m_SelectedShader = 0;
+			std::memset(m_Buffer, 0, sizeof(m_Buffer));
+			strcpy_s(m_Buffer, sizeof(m_Buffer), "Unnamed");
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::SameLine();
+
+		// Cancel button
+		if (ImGui::Button("Cancel"))
+			ImGui::CloseCurrentPopup();
+
+		ImGui::EndPopup();
 	}
 
 	// Scene tree
 	ImGui::SetNextItemOpen(true);
-	if (ImGui::TreeNode("Scene"))
+	if (ImGui::TreeNode("Object list"))
 	{
 		for (int i = 0; i < objects.size(); i++)
 		{
@@ -140,7 +195,7 @@ void ImGuiWindow::Update(bool isCursorDisabled, Scene* scene)
 					if (isUniformScaling)
 					{
 						// Synchronizing XYZ sliders based on the one that is being modified
-						if (scale[0] != objectScale.x) 
+						if (scale[0] != objectScale.x)
 						{
 							scale[1] = scale[0];
 							scale[2] = scale[0];
@@ -162,18 +217,20 @@ void ImGuiWindow::Update(bool isCursorDisabled, Scene* scene)
 					{
 						objects[i]->SetScale(glm::vec3(scale[0], scale[1], scale[2]));
 					}
-					
+
 				}
 
 				ImGui::SameLine();
 				ImGui::Checkbox("isUniform", &isUniformScaling);
+
+				ImGui::Separator();
 
 				// Delete button
 				ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 100);
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.66f, 0.2f, 0.2f, 1.0f));
 				if (ImGui::Button("Remove"))
 				{
-					scene->RemoveObject(objects[i]);
+					scene->RemoveObject(i);
 				}
 				ImGui::PopStyleColor();
 
@@ -183,14 +240,26 @@ void ImGuiWindow::Update(bool isCursorDisabled, Scene* scene)
 		}
 		ImGui::TreePop();
 	}
-
-	ImGui::End();
-
-	// ImGui::ShowDemoWindow();
 }
 
-void ImGuiWindow::Render() const
+template <class T>
+bool ImGuiWindow::CreateCombobox(std::vector<std::unique_ptr<T>>& vector, int* selected, std::string&& text)
 {
-	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	bool ret = false;
+
+	ImGui::PushID(text.c_str());
+	std::vector<const char*> names;
+	for (const auto& el : vector)
+	{
+		names.push_back(el->GetName().c_str());
+	}
+
+	if (!names.empty())
+		ret = ImGui::Combo(text.c_str(), selected, names.data(), static_cast<int>(names.size()));
+	else
+		ImGui::Text("No %s available", text);
+
+	ImGui::PopID();
+
+	return ret;
 }

@@ -184,13 +184,14 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\shaders\shader.frag" />
-    <None Include="res\shaders\shader.vert" />
+    <None Include="res\shaders\texture.frag" />
+    <None Include="res\shaders\default.vert" />
     <None Include="res\shaders\light.frag" />
     <None Include="res\shaders\gouraud.vert" />
     <None Include="res\shaders\gouraud.frag" />
     <None Include="src\vendor\imgui\imgui.natstepfilter" />
     <None Include="res\shaders\gooch.frag" />
+    <None Include="res\shaders\default.frag" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="src\vendor\imgui\imgui.natvis" />
