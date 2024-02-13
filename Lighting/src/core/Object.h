@@ -7,16 +7,18 @@
 
 #include "geometry/Mesh.h"
 #include "Shader.h"
-#include "Material.h"
-#include "Texture.h"
+#include "Material.hpp"
 
 class Object
 {
 public:
 	bool isUniformScaling;
+	int selectedMesh;
+	int selectedMaterial;
+	int selectedShader;
 
 public:
-	Object(Mesh* mesh, Material* material, Shader* shader);
+	Object(std::string&& name, Mesh* mesh, Material* material, Shader* shader);
 
 	virtual void Draw() const;
 	
@@ -31,10 +33,6 @@ public:
 	void SetScale(glm::vec3 scale);
 
 	void SetViewAndProjectionMatrix(const glm::mat4& view, const glm::mat4& proj);
-	void SetTexture(Texture* texture);
-	void SetSpecularTexture(Texture* texture);
-	void SetEmissionMap(Texture* texture);
-
 	void SetDirectionalLight(glm::vec3&& direction, glm::vec3&& ambient, glm::vec3&& diffuse, glm::vec3&& specular);
 
 	// Getters
@@ -61,8 +59,4 @@ protected:
 
 	glm::mat4 m_ViewTransform;
 	glm::mat4 m_ProjectionTransform;
-
-	Texture* m_Texture;
-	Texture* m_SpecularTexture;
-	Texture* m_EmissionMap;
 };

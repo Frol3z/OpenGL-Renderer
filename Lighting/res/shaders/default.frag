@@ -12,6 +12,10 @@ struct Material
 	vec3 diffuse;
 	vec3 specular;
 	float shininess;
+
+	sampler2D diffuseMap;
+	sampler2D specularMap;
+	sampler2D emissionMap;
 };
 
 struct DirLight
@@ -24,6 +28,7 @@ struct DirLight
 
 uniform Material u_material;
 uniform DirLight u_dirLight;
+uniform bool u_isTextured;
 
 vec3 CalcDirLight(DirLight dir, Material mat, vec3 normal, vec3 viewDir);
 
@@ -45,18 +50,36 @@ void main()
 vec3 CalcDirLight(DirLight dir, Material mat, vec3 normal, vec3 viewDir)
 {
 	vec3 lightDir = normalize(-dir.direction);
+	vec3 ambient, diffuse, specular;
 
-	// Ambient
-	vec3 ambient = dir.ambient * mat.ambient;
+	if(u_isTextured)
+	{
+		// Ambient
+		ambient = dir.ambient * vec3(texture(u_material.diffuseMap, TexCoord));
 
-	// Diffuse
-	float diff = max(dot(normal, vec3(lightDir)), 0.0);
-	vec3 diffuse = dir.diffuse * diff * mat.diffuse;
+		// Diffuse
+		float diff = max(dot(normal, vec3(lightDir)), 0.0);
+		diffuse = dir.diffuse * diff * vec3(texture(u_material.diffuseMap, TexCoord));
 
-	// Specular
-	vec3 reflectDir = reflect(vec3(-lightDir), normal);
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), mat.shininess);
-	vec3 specular = dir.specular * spec * mat.specular;
+		// Specular
+		vec3 reflectDir = reflect(vec3(-lightDir), normal);
+		float spec = pow(max(dot(viewDir, reflectDir), 0.0), u_material.shininess);
+		specular = dir.specular * spec * vec3(texture(u_material.specularMap, TexCoord));
+	} 
+	else
+	{
+		// Ambient
+		ambient = dir.ambient * mat.ambient;
+
+		// Diffuse
+		float diff = max(dot(normal, vec3(lightDir)), 0.0);
+		diffuse = dir.diffuse * diff * mat.diffuse;
+
+		// Specular
+		vec3 reflectDir = reflect(vec3(-lightDir), normal);
+		float spec = pow(max(dot(viewDir, reflectDir), 0.0), mat.shininess);
+		specular = dir.specular * spec * mat.specular;
+	}
 
 	return ambient + diffuse + specular;
 }

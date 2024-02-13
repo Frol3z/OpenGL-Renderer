@@ -11,7 +11,7 @@ enum VertexLayout {
 class Mesh
 {
 public:
-	Mesh(const float* vertices, size_t vSize, VertexLayout layout, const unsigned int* indices = nullptr, size_t iSize = 0);
+	Mesh(std::string&& name, const float* vertices, size_t vSize, VertexLayout layout, const unsigned int* indices = nullptr, size_t iSize = 0);
 	~Mesh();
 
 	void Bind() const;

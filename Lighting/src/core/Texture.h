@@ -16,7 +16,8 @@ public:
 		GLint magFilter
 	);
 
-	void Use();
+	void Bind() const;
+	void Unbind() const;
 
 	unsigned int GetTexture() const;
 

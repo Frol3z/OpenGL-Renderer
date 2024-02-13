@@ -73,22 +73,6 @@ int main()
 	// Data setup
 	SceneSetup();
 
-	/*
-		Shader* gouraudShader = new Shader("res/shaders/gouraud.vert", "res/shaders/gouraud.frag");
-		Shader* phongShader = new Shader("res/shaders/shader.vert", "res/shaders/shader.frag");
-		Shader* lightShader = new Shader("res/shaders/shader.vert", "res/shaders/light.frag");
-
-		Texture* metallicBoxTex = new Texture("res/textures/container.png");
-		Texture* metallicBoxSpecularTex = new Texture("res/textures/container_specular.png");
-		Texture* emissionTex = new Texture("res/textures/container_emission_2.png");
-
-		std::unique_ptr<Object> defaultObject = std::make_unique<Object>(cubeMesh, phongShader, defaultMaterial);
-		defaultObject->SetName("Default cube");
-		defaultObject->SetTexture(metallicBoxTex);
-		defaultObject->SetSpecularTexture(metallicBoxSpecularTex);
-		defaultObject->SetEmissionMap(emissionTex);
-	*/
-
 	glEnable(GL_DEPTH_TEST);
 
 	while (!ShouldClose())
@@ -273,34 +257,98 @@ static void SceneSetup()
 	};
 
 	// Meshes
-	std::unique_ptr<Mesh> cubeMesh = std::make_unique<Mesh>(cubeVertices, sizeof(cubeVertices), VertexLayout::VFNFTF);
-	cubeMesh->SetName("Cube");
-	
-	std::unique_ptr<Mesh> sphereMesh = std::make_unique<Mesh>(sphereVertices, sphereVerticesSize, VertexLayout::VFNF, sphere.getIndices(), sphere.getIndexSize());
-	sphereMesh->SetName("Sphere");
+	std::unique_ptr<Mesh> cubeMesh = std::make_unique<Mesh>("Cube", cubeVertices, sizeof(cubeVertices), VertexLayout::VFNFTF);
+	std::unique_ptr<Mesh> sphereMesh = std::make_unique<Mesh>("Sphere", sphereVertices, sphereVerticesSize, VertexLayout::VFNF, sphere.getIndices(), sphere.getIndexSize());
 
-	// Materials
-	std::unique_ptr<Material> material = std::make_unique<Material>(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.5f), 32.0f);
-	material->SetName("Default");
+	// Textures
+	std::unique_ptr<Texture> container = std::make_unique<Texture>("res/textures/container.png");
+	std::unique_ptr<Texture> containerSpec = std::make_unique<Texture>("res/textures/container_specular.png");
+	std::unique_ptr<Texture> wall = std::make_unique<Texture>("res/textures/wall.jpg");
+	std::unique_ptr<Texture> cobblestone = std::make_unique<Texture>("res/textures/cobblestone.jpg");
+
+	// Non-textured materials
+	std::unique_ptr<Material> defaultMat = std::make_unique<Material>("Default");
+	std::unique_ptr<Material> emeraldMat = std::make_unique<Material>("Emerald", glm::vec3(0.0215f, 0.1745f, 0.0215f), glm::vec3(0.07568f, 0.61424f, 0.07568f), glm::vec3(0.633f, 0.727811f, 0.633f), 128 * 0.6f);
+	std::unique_ptr<Material> jadeMat = std::make_unique<Material>("Jade", glm::vec3(0.135f, 0.2225f, 0.1575f), glm::vec3(0.54f, 0.89f, 0.63f), glm::vec3(0.316228f, 0.316228f, 0.316228f), 128 * 0.1f);
+	std::unique_ptr<Material> obsidianMat = std::make_unique<Material>("Obsidian", glm::vec3(0.05375f, 0.05f, 0.06625f), glm::vec3(0.18275f, 0.17f, 0.22525f), glm::vec3(0.332741f, 0.328634f, 0.346435f), 128 * 0.3f);
+	std::unique_ptr<Material> pearlMat = std::make_unique<Material>("Pearl", glm::vec3(0.25f, 0.20725f, 0.20725f), glm::vec3(1.0f, 0.829f, 0.829f), glm::vec3(0.296648f, 0.296648f, 0.296648f), 128 * 0.088f);
+	std::unique_ptr<Material> rubyMat = std::make_unique<Material>("Ruby", glm::vec3(0.1745f, 0.01175f, 0.01175f), glm::vec3(0.61424f, 0.04136f, 0.04136f), glm::vec3(0.727811f, 0.626959f, 0.626959f), 128 * 0.6f);
+	std::unique_ptr<Material> turquoiseMat = std::make_unique<Material>("Turquoise", glm::vec3(0.1f, 0.18725f, 0.1745f), glm::vec3(0.396f, 0.74151f, 0.69102f), glm::vec3(0.297254f, 0.30829f, 0.306678f), 128 * 0.1f);
+	std::unique_ptr<Material> brassMat = std::make_unique<Material>("Brass", glm::vec3(0.329412f, 0.223529f, 0.027451f), glm::vec3(0.780392f, 0.568627f, 0.113725f), glm::vec3(0.992157f, 0.941176f, 0.807843f), 128 * 0.21794872f);
+	std::unique_ptr<Material> bronzeMat = std::make_unique<Material>("Bronze", glm::vec3(0.2125f, 0.1275f, 0.054f), glm::vec3(0.714f, 0.4284f, 0.18144f), glm::vec3(0.393548f, 0.271906f, 0.166721f), 128 * 0.2f);
+	std::unique_ptr<Material> chromeMat = std::make_unique<Material>("Chrome", glm::vec3(0.25f, 0.25f, 0.25f), glm::vec3(0.4f, 0.4f, 0.4f), glm::vec3(0.774597f, 0.774597f, 0.774597f), 128 * 0.6f);
+	std::unique_ptr<Material> copperMat = std::make_unique<Material>("Copper", glm::vec3(0.19125f, 0.0735f, 0.0225f), glm::vec3(0.7038f, 0.27048f, 0.0828f), glm::vec3(0.256777f, 0.137622f, 0.086014f), 128 * 0.1f);
+	std::unique_ptr<Material> goldMat = std::make_unique<Material>("Gold", glm::vec3(0.24725f, 0.1995f, 0.0745f), glm::vec3(0.75164f, 0.60648f, 0.22648f), glm::vec3(0.628281f, 0.555802f, 0.366065f), 128 * 0.4f);
+	std::unique_ptr<Material> silverMat = std::make_unique<Material>("Silver", glm::vec3(0.19225f, 0.19225f, 0.19225f), glm::vec3(0.50754f, 0.50754f, 0.50754f), glm::vec3(0.508273f, 0.508273f, 0.508273f), 128 * 0.4f);
+	std::unique_ptr<Material> blackPlasticMat = std::make_unique<Material>("Black Plastic", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.01f, 0.01f, 0.01f), glm::vec3(0.50f, 0.50f, 0.50f), 128 * 0.25f);
+	std::unique_ptr<Material> cyanPlasticMat = std::make_unique<Material>("Cyan Plastic", glm::vec3(0.0f, 0.1f, 0.06f), glm::vec3(0.0f, 0.50980392f, 0.50980392f), glm::vec3(0.50196078f, 0.50196078f, 0.50196078f), 128 * 0.25f);
+	std::unique_ptr<Material> greenPlasticMat = std::make_unique<Material>("Green Plastic", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.1f, 0.35f, 0.1f), glm::vec3(0.45f, 0.55f, 0.45f), 128 * 0.25f);
+	std::unique_ptr<Material> redPlasticMat = std::make_unique<Material>("Red Plastic", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.0f, 0.0f), glm::vec3(0.7f, 0.6f, 0.6f), 128 * 0.25f);
+	std::unique_ptr<Material> whitePlasticMat = std::make_unique<Material>("White Plastic", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.55f, 0.55f, 0.55f), glm::vec3(0.70f, 0.70f, 0.70f), 128 * 0.25f);
+	std::unique_ptr<Material> yellowPlasticMat = std::make_unique<Material>("Yellow Plastic", glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.5f, 0.5f, 0.0f), glm::vec3(0.60f, 0.60f, 0.50f), 128 * 0.25f);
+	std::unique_ptr<Material> blackRubberMat = std::make_unique<Material>("Black Rubber", glm::vec3(0.02f, 0.02f, 0.02f), glm::vec3(0.01f, 0.01f, 0.01f), glm::vec3(0.4f, 0.4f, 0.4f), 128 * 0.078125f);
+	std::unique_ptr<Material> cyanRubberMat = std::make_unique<Material>("Cyan Rubber", glm::vec3(0.0f, 0.05f, 0.05f), glm::vec3(0.4f, 0.5f, 0.5f), glm::vec3(0.04f, 0.7f, 0.7f), 128 * 0.078125f);
+	std::unique_ptr<Material> greenRubberMat = std::make_unique<Material>("Green Rubber", glm::vec3(0.0f, 0.05f, 0.0f), glm::vec3(0.4f, 0.5f, 0.4f), glm::vec3(0.04f, 0.7f, 0.04f), 128 * 0.078125f);
+	std::unique_ptr<Material> redRubberMat = std::make_unique<Material>("Red Rubber", glm::vec3(0.05f, 0.0f, 0.0f), glm::vec3(0.5f, 0.4f, 0.4f), glm::vec3(0.7f, 0.04f, 0.04f), 128 * 0.078125f);
+	std::unique_ptr<Material> whiteRubberMat = std::make_unique<Material>("White Rubber", glm::vec3(0.05f, 0.05f, 0.05f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.7f, 0.7f, 0.7f), 128 * 0.078125f);
+	std::unique_ptr<Material> yellowRubberMat = std::make_unique<Material>("Yellow Rubber", glm::vec3(0.05f, 0.05f, 0.0f), glm::vec3(0.5f, 0.5f, 0.4f), glm::vec3(0.7f, 0.7f, 0.04f), 128 * 0.078125f);
+
+	// Textures materials
+	std::unique_ptr<Material> containerMat = std::make_unique<Material>("Container", container.get(), containerSpec.get(), 32.0f);
+	std::unique_ptr<Material> wallMat = std::make_unique<Material>("Wall", wall.get(), nullptr, 32.0f);
+	std::unique_ptr<Material> cobblestoneMat = std::make_unique<Material>("Cobblestone", cobblestone.get(), nullptr, 32.0f);
 
 	// Shaders
 	std::unique_ptr<Shader> shader = std::make_unique<Shader>("res/shaders/default.vert", "res/shaders/default.frag");
 	shader->SetName("Default");
 	std::unique_ptr<Shader> gouraud = std::make_unique<Shader>("res/shaders/gouraud.vert", "res/shaders/gouraud.frag");
-	gouraud->SetName("Gouraud");
+	gouraud->SetName("Gouraud (non-textured only)");
 
 	// Objects
-	std::unique_ptr<Object> obj1 = std::make_unique<Object>(cubeMesh.get(), material.get(), shader.get());
-	obj1->SetName("Default cube");
-	// std::unique_ptr<Object> obj2 = std::make_unique<Object>(sphereMesh.get(), material.get(), shader.get());
+	std::unique_ptr<Object> obj1 = std::make_unique<Object>("Default cube", cubeMesh.get(), defaultMat.get(), shader.get());
 
 	scene->AddMesh(std::move(cubeMesh));
 	scene->AddMesh(std::move(sphereMesh));
-	scene->AddMaterial(std::move(material));
+
+	scene->AddTexture(std::move(container));
+	scene->AddTexture(std::move(containerSpec));
+	scene->AddTexture(std::move(wall));
+	scene->AddTexture(std::move(cobblestone));
+
+	scene->AddMaterial(std::move(defaultMat));
+	scene->AddMaterial(std::move(emeraldMat));
+	scene->AddMaterial(std::move(jadeMat));
+	scene->AddMaterial(std::move(obsidianMat));
+	scene->AddMaterial(std::move(pearlMat));
+	scene->AddMaterial(std::move(rubyMat));
+	scene->AddMaterial(std::move(turquoiseMat));
+	scene->AddMaterial(std::move(brassMat));
+	scene->AddMaterial(std::move(bronzeMat));
+	scene->AddMaterial(std::move(chromeMat));
+	scene->AddMaterial(std::move(copperMat));
+	scene->AddMaterial(std::move(goldMat));
+	scene->AddMaterial(std::move(silverMat));
+	scene->AddMaterial(std::move(blackPlasticMat));
+	scene->AddMaterial(std::move(cyanPlasticMat));
+	scene->AddMaterial(std::move(greenPlasticMat));
+	scene->AddMaterial(std::move(redPlasticMat));
+	scene->AddMaterial(std::move(whitePlasticMat));
+	scene->AddMaterial(std::move(yellowPlasticMat));
+	scene->AddMaterial(std::move(blackRubberMat));
+	scene->AddMaterial(std::move(cyanRubberMat));
+	scene->AddMaterial(std::move(greenRubberMat));
+	scene->AddMaterial(std::move(redRubberMat));
+	scene->AddMaterial(std::move(whiteRubberMat));
+	scene->AddMaterial(std::move(yellowRubberMat));
+
+	scene->AddMaterial(std::move(containerMat));
+	scene->AddMaterial(std::move(wallMat));
+	scene->AddMaterial(std::move(cobblestoneMat));
+
 	scene->AddShader(std::move(shader));
 	scene->AddShader(std::move(gouraud));
+
 	scene->AddObject(std::move(obj1));
-	// scene->AddObject(std::move(obj2));
 }
 
 static void OnKeyboard(GLFWwindow* window, int key, int scancode, int action, int mods)

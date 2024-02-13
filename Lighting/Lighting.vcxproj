@@ -61,7 +61,7 @@
     <ClInclude Include="src\vendor\cubesphere\Cubesphere.h" />
     <ClInclude Include="src\core\imgui\ImGuiWindow.h" />
     <ClInclude Include="src\core\geometry\IndexBuffer.h" />
-    <ClInclude Include="src\core\Material.h" />
+    <ClInclude Include="src\core\Material.hpp" />
     <ClInclude Include="src\core\geometry\Mesh.h" />
     <ClInclude Include="src\core\Object.h" />
     <ClInclude Include="src\core\Scene.h" />
@@ -83,7 +83,6 @@
     <None Include="res\shaders\gouraud.frag" />
     <None Include="res\shaders\gouraud.vert" />
     <None Include="res\shaders\light.frag" />
-    <None Include="res\shaders\texture.frag" />
     <None Include="res\shaders\default.vert" />
     <None Include="src\vendor\imgui\imgui.natstepfilter" />
   </ItemGroup>

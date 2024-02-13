@@ -2,25 +2,9 @@
 
 #include <stb_image/stb_image.h>
 
-Texture::Texture(std::string path)
+Texture::Texture(std::string path) :
+	Texture(path, 0, GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR)
 {
-	// create texture
-	CreateTexture(GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
-	
-	// get the image format
-	SetFileFormat(path);
-
-	// based on the image format, convert to pixel data format
-	GLenum glFormat = GL_NONE;
-	switch (format)
-	{
-		case Format::JPG: glFormat = GL_RGB; break;
-		case Format::PNG: glFormat = GL_RGBA; break;
-		default: break; 
-	}
-
-	// loading from file
-	LoadFromFile(path, 0, glFormat);
 }
 
 Texture::Texture(std::string path, int levelOfDetail, GLint wrapS, GLint wrapT, GLint minFilter, GLint magFilter)
@@ -42,11 +26,17 @@ Texture::Texture(std::string path, int levelOfDetail, GLint wrapS, GLint wrapT, 
 
 	// loading from file
 	LoadFromFile(path, levelOfDetail, glFormat);
+	Unbind();
 }
 
-void Texture::Use()
+void Texture::Bind() const
 {
 	glBindTexture(GL_TEXTURE_2D, texture);
+}
+
+void Texture::Unbind() const
+{
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 unsigned int Texture::GetTexture() const
@@ -76,7 +66,7 @@ void Texture::LoadFromFile(std::string path, int levelOfDetail, GLenum format)
 void Texture::CreateTexture(GLint wrapS, GLint wrapT, GLint minFilter, GLint magFilter)
 {
 	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	Bind();
 
 	// configuration
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);

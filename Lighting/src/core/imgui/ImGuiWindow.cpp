@@ -48,15 +48,15 @@ void ImGuiWindow::Update(bool isCursorDisabled, Scene* scene)
 		ImGui::SetNextWindowCollapsed(false, ImGuiCond_Always);
 
 	// The actual ImGui window's layout
-	ImGui::Begin("ImGui");
+	ImGui::Begin("Editor", NULL, ImGuiWindowFlags_AlwaysAutoResize);
 
-	CreateCameraUI(scene->GetCamera());
-	CreateDirectionalLightUI(scene->GetDirectionalLight());
 	CreateObjectsUI(scene);
+	CreateDirectionalLightUI(scene->GetDirectionalLight());
+	CreateCameraUI(scene->GetCamera());
 
 	ImGui::End();
 
-	ImGui::ShowDemoWindow();
+	// ImGui::ShowDemoWindow();
 }
 
 void ImGuiWindow::Render() const
@@ -118,40 +118,42 @@ void ImGuiWindow::CreateObjectsUI(Scene* scene)
 	ImGui::SeparatorText("Scene");
 
 	auto& objects = scene->GetObjects();
+	auto& meshes = scene->GetMeshes();
+	auto& materials = scene->GetMaterials();
+	auto& shaders = scene->GetShaders();
 
 	// Add object button
-	ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 100);
 	if (ImGui::Button("Add object"))
 		ImGui::OpenPopup("New object");
 
 	// Add object modal
-	if (ImGui::BeginPopupModal("New object", NULL, ImGuiWindowFlags_AlwaysAutoResize)) 
+	if (ImGui::BeginPopupModal("New object", NULL, ImGuiWindowFlags_AlwaysAutoResize))
 	{
 		ImGui::InputText("Name", m_Buffer, sizeof(m_Buffer));
 
-		CreateCombobox(scene->GetMeshes(), &m_SelectedMesh, "Mesh");
-		CreateCombobox(scene->GetMaterials(), &m_SelectedMaterial, "Material");
-		CreateCombobox(scene->GetShaders(), &m_SelectedShader, "Shader");
+		CreateCombobox(meshes, &m_SelectedMesh, "Mesh");
+		CreateCombobox(materials, &m_SelectedMaterial, "Material");
+		CreateCombobox(shaders, &m_SelectedShader, "Shader");
 
 		// Confirm button
 		if (ImGui::Button("OK"))
 		{
 			// Creating the new object
 			std::unique_ptr<Object> newObject = std::make_unique<Object>(
-				scene->GetMeshes().at(m_SelectedMesh).get(),
-				scene->GetMaterials().at(m_SelectedMaterial).get(),
-				scene->GetShaders().at(m_SelectedShader).get()
+				std::string(m_Buffer),
+				meshes.at(m_SelectedMesh).get(),
+				materials.at(m_SelectedMaterial).get(),
+				shaders.at(m_SelectedShader).get()
 			);
-
-			newObject->SetName(std::string(m_Buffer));
-
 			scene->AddObject(std::move(newObject));
 
+			// Reset inputs
 			m_SelectedMesh = 0;
 			m_SelectedMaterial = 0;
 			m_SelectedShader = 0;
 			std::memset(m_Buffer, 0, sizeof(m_Buffer));
 			strcpy_s(m_Buffer, sizeof(m_Buffer), "Unnamed");
+
 			ImGui::CloseCurrentPopup();
 		}
 
@@ -165,14 +167,19 @@ void ImGuiWindow::CreateObjectsUI(Scene* scene)
 	}
 
 	// Scene tree
-	ImGui::SetNextItemOpen(true);
+	ImGui::NewLine();
+	ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 	if (ImGui::TreeNode("Object list"))
 	{
 		for (int i = 0; i < objects.size(); i++)
 		{
+			if (i == 0)
+				ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+
 			if (ImGui::TreeNode((void*)(intptr_t)i, objects[i]->GetName().c_str(), i))
 			{
 				ImGui::PushID(i);
+				ImGui::NewLine();
 
 				// Object position
 				auto objectPos = objects[i]->GetPosition();
@@ -223,7 +230,19 @@ void ImGuiWindow::CreateObjectsUI(Scene* scene)
 				ImGui::SameLine();
 				ImGui::Checkbox("isUniform", &isUniformScaling);
 
-				ImGui::Separator();
+				ImGui::NewLine();
+
+				// Object mesh
+				if (CreateCombobox(meshes, &objects[i]->selectedMesh, "Mesh"))
+					objects[i]->SetMesh(meshes.at(objects[i]->selectedMesh).get());
+
+				// Object material
+				if (CreateCombobox(materials, &objects[i]->selectedMaterial, "Material"))
+					objects[i]->SetMaterial(materials.at(objects[i]->selectedMaterial).get());
+
+				// Object shader
+				if (CreateCombobox(shaders, &objects[i]->selectedShader, "Shader"))
+					objects[i]->SetShader(shaders.at(objects[i]->selectedShader).get());
 
 				// Delete button
 				ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 100);
