@@ -44,6 +44,9 @@ void main()
 	// @todo Point lights
 	// @todo Spot lights
 
+	if(u_isTextured)
+		result += vec3(texture(u_material.emissionMap, TexCoord));
+
 	FragColor = vec4(result, 1.0);
 }
 

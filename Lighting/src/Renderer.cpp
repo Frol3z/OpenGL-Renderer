@@ -263,6 +263,7 @@ static void SceneSetup()
 	// Textures
 	std::unique_ptr<Texture> container = std::make_unique<Texture>("res/textures/container.png");
 	std::unique_ptr<Texture> containerSpec = std::make_unique<Texture>("res/textures/container_specular.png");
+	std::unique_ptr<Texture> containerEmis = std::make_unique<Texture>("res/textures/container_emission_2.png");
 	std::unique_ptr<Texture> wall = std::make_unique<Texture>("res/textures/wall.jpg");
 	std::unique_ptr<Texture> cobblestone = std::make_unique<Texture>("res/textures/cobblestone.jpg");
 
@@ -295,6 +296,7 @@ static void SceneSetup()
 
 	// Textures materials
 	std::unique_ptr<Material> containerMat = std::make_unique<Material>("Container", container.get(), containerSpec.get(), 32.0f);
+	containerMat->SetEmissionMap(containerEmis.get());
 	std::unique_ptr<Material> wallMat = std::make_unique<Material>("Wall", wall.get(), nullptr, 32.0f);
 	std::unique_ptr<Material> cobblestoneMat = std::make_unique<Material>("Cobblestone", cobblestone.get(), nullptr, 32.0f);
 
@@ -312,6 +314,7 @@ static void SceneSetup()
 
 	scene->AddTexture(std::move(container));
 	scene->AddTexture(std::move(containerSpec));
+	scene->AddTexture(std::move(containerEmis));
 	scene->AddTexture(std::move(wall));
 	scene->AddTexture(std::move(cobblestone));
 
