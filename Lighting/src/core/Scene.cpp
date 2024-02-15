@@ -10,13 +10,11 @@ Scene::Scene() :
 
 void Scene::Draw()
 {
-	/* 
-		For every object I need to :
-			- update the view and projection matrices;
-			- tell it the properties of the directional light that is affecting it (may change);
-			- also point and spot lights;
-			- finally draw.
-	*/
+	for (auto& pointLight : m_PointLights)
+	{
+		pointLight->SetViewAndProjectionMatrix(m_Camera.GetViewMatrix(), m_Camera.GetProjectionMatrix());
+		pointLight->Draw();
+	}
 
 	for (auto& object : m_Objects)
 	{
@@ -35,6 +33,19 @@ void Scene::RemoveObject(size_t toDelete)
 {
 	if (toDelete < m_Objects.size())
 		m_Objects.erase(m_Objects.begin() + toDelete);
+	else
+		std::cerr << "Invalid index. Index is out of range." << std::endl;
+}
+
+void Scene::AddPointLight(std::unique_ptr<PointLight> light)
+{
+	m_PointLights.push_back(std::move(light));
+}
+
+void Scene::RemovePointLight(size_t toDelete)
+{
+	if (toDelete < m_PointLights.size())
+		m_PointLights.erase(m_PointLights.begin() + toDelete);
 	else
 		std::cerr << "Invalid index. Index is out of range." << std::endl;
 }

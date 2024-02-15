@@ -44,6 +44,7 @@
   <ItemGroup>
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\core\light\DirectionalLight.hpp" />
+    <ClInclude Include="src\core\light\PointLight.hpp" />
     <ClInclude Include="src\core\Texture.h" />
     <ClInclude Include="src\vendor\imgui\imconfig.h" />
     <ClInclude Include="src\vendor\imgui\imgui.h" />

@@ -47,13 +47,19 @@ void ImGuiWindow::Update(bool isCursorDisabled, Scene* scene)
 	else
 		ImGui::SetNextWindowCollapsed(false, ImGuiCond_Always);
 
-	// The actual ImGui window's layout
+	// UI Layout
 	ImGui::Begin("Editor", NULL, ImGuiWindowFlags_AlwaysAutoResize);
 
-	CreateObjectsUI(scene);
-	CreateDirectionalLightUI(scene->GetDirectionalLight());
-	CreateCameraUI(scene->GetCamera());
+	ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+	if(ImGui::CollapsingHeader("Scene"))
+		CreateObjectsUI(scene);
 
+	if (ImGui::CollapsingHeader("Directional Light"))
+		CreateDirectionalLightUI(scene->GetDirectionalLight());
+
+	if (ImGui::CollapsingHeader("Camera"))
+		CreateCameraUI(scene->GetCamera());
+	
 	ImGui::End();
 
 	// ImGui::ShowDemoWindow();
@@ -67,8 +73,6 @@ void ImGuiWindow::Render() const
 
 void ImGuiWindow::CreateCameraUI(Camera& camera)
 {
-	ImGui::SeparatorText("Camera");
-
 	// Speed
 	float speed = camera.GetSpeed();
 	if (ImGui::SliderFloat("Speed", &speed, 0.1f, 100.0f))
@@ -82,8 +86,6 @@ void ImGuiWindow::CreateCameraUI(Camera& camera)
 
 void ImGuiWindow::CreateDirectionalLightUI(DirectionalLight& dirLight)
 {
-	ImGui::SeparatorText("Lights");
-
 	// Direction
 	float direction[3] = { dirLight.GetDirection().x, dirLight.GetDirection().y, dirLight.GetDirection().z };
 	if (ImGui::SliderFloat3("Direction", direction, -1.0f, 1.0f))
@@ -115,8 +117,6 @@ void ImGuiWindow::CreateDirectionalLightUI(DirectionalLight& dirLight)
 
 void ImGuiWindow::CreateObjectsUI(Scene* scene)
 {
-	ImGui::SeparatorText("Scene");
-
 	auto& objects = scene->GetObjects();
 	auto& meshes = scene->GetMeshes();
 	auto& materials = scene->GetMaterials();

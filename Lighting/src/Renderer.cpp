@@ -1,4 +1,3 @@
-#define GLAD_INCLUDED
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -21,22 +20,25 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/string_cast.hpp>
 
-// Preprocessors
 #define WINDOW_TITLE "OpenGL Renderer"
 #define WINDOW_WIDTH 1280
 #define WINDOW_HEIGHT 720
+
+// @todo Move them in a common folder/file
 #define LOG(x) std::cout << x << std::endl
 #define LOG_GLM(x) LOG(glm::to_string(x).c_str())
 
-// Global variables
+// Window
 ImGuiWindow imGui;
 GLFWwindow* window;
 bool isFullscreen = false;
 
+// Renderer
 Timer& timer = Timer::Get();
 std::unique_ptr<Scene> scene = std::make_unique<Scene>();
 Camera& camera = scene->GetCamera();
 
+// Mouse input
 float lastX = 0.0f;
 float lastY = 0.0f;
 bool isFirstMouse = true;
@@ -70,9 +72,7 @@ int main()
 		return -1;
 	}
 	
-	// Data setup
 	SceneSetup();
-
 	glEnable(GL_DEPTH_TEST);
 
 	while (!ShouldClose())
@@ -83,15 +83,14 @@ int main()
 		timer.Update(glfwGetTime());
 		UpdatePerformanceDisplay();
 
-		// ImGui
+		// UI
 		imGui.Update(isCursorDisabled, scene.get());
 		
 		// Inputs
 		ProcessCameraInput();
 
-		ClearBuffers();
-
 		// Draw
+		ClearBuffers();
 		scene->Draw();
 		CheckOpenGLErrors();
 		imGui.Render();
@@ -305,6 +304,8 @@ static void SceneSetup()
 	shader->SetName("Default");
 	std::unique_ptr<Shader> gouraud = std::make_unique<Shader>("res/shaders/gouraud.vert", "res/shaders/gouraud.frag");
 	gouraud->SetName("Gouraud (non-textured only)");
+	std::unique_ptr<Shader> gooch = std::make_unique<Shader>("res/shaders/default.vert", "res/shaders/gooch.frag");
+	gooch->SetName("Gooch (non-textured only)");
 
 	// Objects
 	std::unique_ptr<Object> obj1 = std::make_unique<Object>("Default cube", cubeMesh.get(), defaultMat.get(), shader.get());
@@ -350,6 +351,7 @@ static void SceneSetup()
 
 	scene->AddShader(std::move(shader));
 	scene->AddShader(std::move(gouraud));
+	scene->AddShader(std::move(gooch));
 
 	scene->AddObject(std::move(obj1));
 }
