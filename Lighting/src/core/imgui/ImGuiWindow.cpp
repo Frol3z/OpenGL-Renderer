@@ -48,11 +48,15 @@ void ImGuiWindow::Update(bool isCursorDisabled, Scene* scene)
 		ImGui::SetNextWindowCollapsed(false, ImGuiCond_Always);
 
 	// UI Layout
-	ImGui::Begin("Editor", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+	ImGui::Begin("Editor (right-click to open)", NULL, ImGuiWindowFlags_AlwaysAutoResize);
 
 	ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-	if(ImGui::CollapsingHeader("Scene"))
+	
+	if (ImGui::CollapsingHeader("Objects"))
 		CreateObjectsUI(scene);
+	
+	if (ImGui::CollapsingHeader("Point Lights"))
+		CreatePointLightsUI(scene);
 
 	if (ImGui::CollapsingHeader("Directional Light"))
 		CreateDirectionalLightUI(scene->GetDirectionalLight());
@@ -168,96 +172,196 @@ void ImGuiWindow::CreateObjectsUI(Scene* scene)
 
 	// Scene tree
 	ImGui::NewLine();
-	ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-	if (ImGui::TreeNode("Object list"))
+	for (int i = 0; i < objects.size(); i++)
 	{
-		for (int i = 0; i < objects.size(); i++)
+		if (i == 0)
+			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+
+		if (ImGui::TreeNode((void*)(intptr_t)i, objects[i]->GetName().c_str(), i))
 		{
-			if (i == 0)
-				ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+			ImGui::PushID(i);
+			ImGui::NewLine();
 
-			if (ImGui::TreeNode((void*)(intptr_t)i, objects[i]->GetName().c_str(), i))
+			// Object position
+			auto objectPos = objects[i]->GetPosition();
+			float position[3] = { objectPos.x, objectPos.y, objectPos.z };
+			if (ImGui::SliderFloat3("Position", position, -10.0f, 10.0f))
+				objects[i]->SetPosition(glm::vec3(position[0], position[1], position[2]));
+
+			// Object rotation
+			auto objectRot = objects[i]->GetRotation();
+			float rotation[3] = { objectRot.x, objectRot.y, objectRot.z };
+			if (ImGui::SliderFloat3("Rotation", rotation, -180.0f, 180.0f))
+				objects[i]->SetRotation(glm::vec3(rotation[0], rotation[1], rotation[2]));
+
+			// Object scale
+			bool& isUniformScaling = objects[i]->isUniformScaling;
+			auto objectScale = objects[i]->GetScale();
+			float scale[3] = { objectScale.x, objectScale.y, objectScale.z };
+			if (ImGui::SliderFloat3("Scale", scale, 0.1f, 10.0f))
 			{
-				ImGui::PushID(i);
-				ImGui::NewLine();
-
-				// Object position
-				auto objectPos = objects[i]->GetPosition();
-				float position[3] = { objectPos.x, objectPos.y, objectPos.z };
-				if (ImGui::SliderFloat3("Position", position, -10.0f, 10.0f))
-					objects[i]->SetPosition(glm::vec3(position[0], position[1], position[2]));
-
-				// Object rotation
-				auto objectRot = objects[i]->GetRotation();
-				float rotation[3] = { objectRot.x, objectRot.y, objectRot.z };
-				if (ImGui::SliderFloat3("Rotation", rotation, -180.0f, 180.0f))
-					objects[i]->SetRotation(glm::vec3(rotation[0], rotation[1], rotation[2]));
-
-				// Object scale
-				bool& isUniformScaling = objects[i]->isUniformScaling;
-				auto objectScale = objects[i]->GetScale();
-				float scale[3] = { objectScale.x, objectScale.y, objectScale.z };
-				if (ImGui::SliderFloat3("Scale", scale, 0.1f, 10.0f))
+				if (isUniformScaling)
 				{
-					if (isUniformScaling)
+					// Synchronizing XYZ sliders based on the one that is being modified
+					if (scale[0] != objectScale.x)
 					{
-						// Synchronizing XYZ sliders based on the one that is being modified
-						if (scale[0] != objectScale.x)
-						{
-							scale[1] = scale[0];
-							scale[2] = scale[0];
-						}
-						else if (scale[1] != objectScale.y)
-						{
-							scale[0] = scale[1];
-							scale[2] = scale[1];
-						}
-						else if (scale[2] != objectScale.z)
-						{
-							scale[0] = scale[2];
-							scale[1] = scale[2];
-						}
-
-						objects[i]->SetScale(glm::vec3(scale[0], scale[1], scale[2]));
+						scale[1] = scale[0];
+						scale[2] = scale[0];
 					}
-					else
+					else if (scale[1] != objectScale.y)
 					{
-						objects[i]->SetScale(glm::vec3(scale[0], scale[1], scale[2]));
+						scale[0] = scale[1];
+						scale[2] = scale[1];
+					}
+					else if (scale[2] != objectScale.z)
+					{
+						scale[0] = scale[2];
+						scale[1] = scale[2];
 					}
 
+					objects[i]->SetScale(glm::vec3(scale[0], scale[1], scale[2]));
 				}
-
-				ImGui::SameLine();
-				ImGui::Checkbox("isUniform", &isUniformScaling);
-
-				ImGui::NewLine();
-
-				// Object mesh
-				if (CreateCombobox(meshes, &objects[i]->selectedMesh, "Mesh"))
-					objects[i]->SetMesh(meshes.at(objects[i]->selectedMesh).get());
-
-				// Object material
-				if (CreateCombobox(materials, &objects[i]->selectedMaterial, "Material"))
-					objects[i]->SetMaterial(materials.at(objects[i]->selectedMaterial).get());
-
-				// Object shader
-				if (CreateCombobox(shaders, &objects[i]->selectedShader, "Shader"))
-					objects[i]->SetShader(shaders.at(objects[i]->selectedShader).get());
-
-				// Delete button
-				ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 100);
-				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.66f, 0.2f, 0.2f, 1.0f));
-				if (ImGui::Button("Remove"))
+				else
 				{
-					scene->RemoveObject(i);
+					objects[i]->SetScale(glm::vec3(scale[0], scale[1], scale[2]));
 				}
-				ImGui::PopStyleColor();
 
-				ImGui::PopID();
-				ImGui::TreePop();
 			}
+
+			ImGui::SameLine();
+			ImGui::Checkbox("isUniform", &isUniformScaling);
+
+			ImGui::NewLine();
+
+			// Object mesh
+			if (CreateCombobox(meshes, &objects[i]->selectedMesh, "Mesh"))
+				objects[i]->SetMesh(meshes.at(objects[i]->selectedMesh).get());
+
+			// Object material
+			if (CreateCombobox(materials, &objects[i]->selectedMaterial, "Material"))
+				objects[i]->SetMaterial(materials.at(objects[i]->selectedMaterial).get());
+
+			// Object shader
+			if (CreateCombobox(shaders, &objects[i]->selectedShader, "Shader"))
+				objects[i]->SetShader(shaders.at(objects[i]->selectedShader).get());
+
+			// Delete button
+			ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 100);
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.66f, 0.2f, 0.2f, 1.0f));
+			if (ImGui::Button("Remove"))
+			{
+				scene->RemoveObject(i);
+			}
+			ImGui::PopStyleColor();
+
+			ImGui::PopID();
+			ImGui::TreePop();
 		}
-		ImGui::TreePop();
+	}
+}
+
+void ImGuiWindow::CreatePointLightsUI(Scene* scene)
+{
+	auto& lights = scene->GetPointLights();
+
+	/*
+		// Add object button
+		if (ImGui::Button("Add point light"))
+			ImGui::OpenPopup("New point light");
+
+		// Add object modal
+		if (ImGui::BeginPopupModal("New point light", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+		{
+			ImGui::InputText("Name", m_Buffer, sizeof(m_Buffer));
+
+			// Choice:
+			//	- color
+			//	- radius
+			//  - intensity (?)
+
+			// Confirm button
+			if (ImGui::Button("OK"))
+			{
+				// Creating the new object
+				std::unique_ptr<PointLight> newLight = std::make_unique<PointLight>(
+					std::string(m_Buffer),
+					meshes.at(m_SelectedMesh).get(),
+					materials.at(m_SelectedMaterial).get(),
+					shaders.at(m_SelectedShader).get()
+				);
+				scene->AddObject(std::move(newObject));
+
+				// Reset inputs
+				m_SelectedMesh = 0;
+				m_SelectedMaterial = 0;
+				m_SelectedShader = 0;
+				std::memset(m_Buffer, 0, sizeof(m_Buffer));
+				strcpy_s(m_Buffer, sizeof(m_Buffer), "Unnamed");
+
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::SameLine();
+
+			// Cancel button
+			if (ImGui::Button("Cancel"))
+				ImGui::CloseCurrentPopup();
+
+			ImGui::EndPopup();
+		}
+	*/
+
+	for (int i = 0; i < lights.size(); i++)
+	{
+		if (ImGui::TreeNode((void*)(intptr_t)i, lights[i]->GetName().c_str(), i))
+		{
+			ImGui::PushID(i);
+			ImGui::NewLine();
+
+			// Object position
+			auto objectPos = lights[i]->GetPosition();
+			float position[3] = { objectPos.x, objectPos.y, objectPos.z };
+			if (ImGui::SliderFloat3("Position", position, -10.0f, 10.0f))
+				lights[i]->SetPosition(glm::vec3(position[0], position[1], position[2]));
+
+			ImGui::NewLine();
+
+			// Change light settings
+			float color[3] = { lights[i]->GetColor().r, lights[i]->GetColor().g, lights[i]->GetColor().b };
+			float intensity = lights[i]->GetIntensity();
+			const float ambStrength = 0.2f;
+			const float difStrength = 0.5f;
+
+			// Color
+			if (ImGui::ColorEdit3("Color", color))
+			{
+				lights[i]->SetColor(glm::vec3(color[0], color[1], color[2]));
+				lights[i]->SetAmbient(glm::vec3(intensity * ambStrength * color[0], intensity * ambStrength * color[1], intensity * ambStrength * color[2]));
+				lights[i]->SetDiffuse(glm::vec3(intensity * difStrength * color[0], intensity * difStrength * color[1], intensity * difStrength * color[2]));
+				lights[i]->SetSpecular(glm::vec3(color[0], color[1], color[2]));
+			}
+
+			// Intensity
+			if (ImGui::SliderFloat("Intensity", &intensity, 0.0f, 10.0f))
+			{
+				lights[i]->SetIntensity(intensity);
+				lights[i]->SetAmbient(glm::vec3(intensity * ambStrength * color[0], intensity * ambStrength * color[1], intensity * ambStrength * color[2]));
+				lights[i]->SetDiffuse(glm::vec3(intensity * difStrength * color[0], intensity * difStrength * color[1], intensity * difStrength * color[2]));
+				lights[i]->SetSpecular(glm::vec3(intensity * color[0], intensity * color[1], intensity * color[2]));
+			}
+
+			// Delete button
+			ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 100);
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.66f, 0.2f, 0.2f, 1.0f));
+			if (ImGui::Button("Remove"))
+			{
+				scene->RemovePointLight(i);
+			}
+			ImGui::PopStyleColor();
+
+			ImGui::PopID();
+			ImGui::TreePop();
+		}
 	}
 }
 

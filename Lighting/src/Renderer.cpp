@@ -306,9 +306,39 @@ static void SceneSetup()
 	gouraud->SetName("Gouraud (non-textured only)");
 	std::unique_ptr<Shader> gooch = std::make_unique<Shader>("res/shaders/default.vert", "res/shaders/gooch.frag");
 	gooch->SetName("Gooch (non-textured only)");
+	std::unique_ptr<Shader> pointLightShader = std::make_unique<Shader>("res/shaders/default.vert", "res/shaders/point_light.frag");
+	pointLightShader->SetName("Point light");
+
+	// Point lights
+	std::unique_ptr<PointLight> pl1 = std::make_unique<PointLight>("Red point light", sphereMesh.get(), defaultMat.get(), pointLightShader.get());
+	pl1->SetPosition(glm::vec3(1.0f, 0.0f, 0.0f));
+	pl1->SetScale(glm::vec3(0.2));
+	pl1->SetColor(glm::vec3(0.7f, 0.0f, 0.0f));
+	pl1->SetAmbient(0.2f * glm::vec3(0.7f, 0.0f, 0.0f));
+	pl1->SetDiffuse(0.5f * glm::vec3(0.7f, 0.0f, 0.0f));
+	pl1->SetSpecular(glm::vec3(0.7f, 0.0f, 0.0f));
+
+	std::unique_ptr<PointLight> pl2 = std::make_unique<PointLight>("Green point light", sphereMesh.get(), defaultMat.get(), pointLightShader.get());
+	pl2->SetPosition(glm::vec3(-1.0f, 0.0f, 0.0f));
+	pl2->SetScale(glm::vec3(0.2));
+	pl2->SetColor(glm::vec3(0.0f, 0.7f, 0.0f));
+	pl2->SetAmbient(0.2f * glm::vec3(0.0f, 0.7f, 0.0f));
+	pl2->SetDiffuse(0.5f * glm::vec3(0.0f, 0.7f, 0.0f));
+	pl2->SetSpecular(glm::vec3(0.0f, 0.7f, 0.0f));
+
+	std::unique_ptr<PointLight> pl3 = std::make_unique<PointLight>("Blue point light", sphereMesh.get(), defaultMat.get(), pointLightShader.get());
+	pl3->SetPosition(glm::vec3(0.0f, 1.0f, 0.0f));
+	pl3->SetScale(glm::vec3(0.2));
+	pl3->SetColor(glm::vec3(0.0f, 0.0f, 0.7f));
+	pl3->SetAmbient(0.2f * glm::vec3(0.0f, 0.0f, 0.7f));
+	pl3->SetDiffuse(0.5f * glm::vec3(0.0f, 0.0f, 0.7f));
+	pl3->SetSpecular(glm::vec3(0.0f, 0.0f, 0.7f));
 
 	// Objects
 	std::unique_ptr<Object> obj1 = std::make_unique<Object>("Default cube", cubeMesh.get(), defaultMat.get(), shader.get());
+	std::unique_ptr<Object> obj2 = std::make_unique<Object>("Default floor", cubeMesh.get(), defaultMat.get(), shader.get());
+	obj2->SetScale(glm::vec3(10.0f, 0.1f, 10.0f));
+	obj2->SetPosition(glm::vec3(0.0f, -1.0f, 0.0f));
 
 	scene->AddMesh(std::move(cubeMesh));
 	scene->AddMesh(std::move(sphereMesh));
@@ -352,8 +382,14 @@ static void SceneSetup()
 	scene->AddShader(std::move(shader));
 	scene->AddShader(std::move(gouraud));
 	scene->AddShader(std::move(gooch));
+	scene->AddShader(std::move(pointLightShader));
+
+	scene->AddPointLight(std::move(pl1));
+	scene->AddPointLight(std::move(pl2));
+	scene->AddPointLight(std::move(pl3));
 
 	scene->AddObject(std::move(obj1));
+	scene->AddObject(std::move(obj2));
 }
 
 static void OnKeyboard(GLFWwindow* window, int key, int scancode, int action, int mods)

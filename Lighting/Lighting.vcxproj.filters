@@ -188,7 +188,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\default.vert" />
-    <None Include="res\shaders\light.frag" />
+    <None Include="res\shaders\point_light.frag" />
     <None Include="res\shaders\gouraud.vert" />
     <None Include="res\shaders\gouraud.frag" />
     <None Include="src\vendor\imgui\imgui.natstepfilter" />

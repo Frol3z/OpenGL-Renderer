@@ -7,12 +7,12 @@ Object::Object(std::string&& name, Mesh* mesh, Material* material, Shader* shade
 	m_Material(material), m_Shader(shader),
 	m_Position(glm::vec3(0.0f)), m_Rotation(glm::vec3(0.0f)), m_Scale(glm::vec3(1.0f)),
 	m_TranslationTransform(glm::mat4(1.0f)), m_RotationTransform(glm::mat4(1.0f)), m_ScaleTransform(glm::mat4(1.0f)),
-	m_ViewTransform(glm::mat4(1.0f)), m_ProjectionTransform(glm::mat4(1.0f)),
+	m_ViewTransform(glm::mat4(1.0f)), m_ProjectionTransform(glm::mat4(1.0f)), m_PointLights(),
 	isUniformScaling(true), selectedMesh(0), selectedMaterial(0), selectedShader(0)
 {
 }
 
-void Object::Draw() const
+void Object::Draw()
 {
 	m_Shader->Use();
 	m_Mesh->Bind();
@@ -29,24 +29,35 @@ void Object::Draw() const
 		glActiveTexture(GL_TEXTURE0);
 		tex->Bind();
 		m_Shader->SetBool("u_isTextured", true);
+
 		m_Shader->SetInt("u_material.diffuseMap", 0);
+		m_Shader->SetInt("u_material.specularMap", 1);
+		m_Shader->SetInt("u_material.emissionMap", 2);
 
 		if (specTex)
 		{
 			glActiveTexture(GL_TEXTURE1);
 			specTex->Bind();
-			m_Shader->SetInt("u_material.specularMap", 1);
+		}
+		else
+		{
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 
 		if (emisTex)
 		{
 			glActiveTexture(GL_TEXTURE2);
 			emisTex->Bind();
-			m_Shader->SetInt("u_material.emissionMap", 2);
+		}
+		else
+		{
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, 0);
 		}
 	}
 
-	// Vertex shader uniforms
+	// Shader uniforms
 	m_Shader->SetMat4("u_model", m_TranslationTransform * m_RotationTransform * m_ScaleTransform);
 	m_Shader->SetMat4("u_view", m_ViewTransform);
 	m_Shader->SetMat4("u_projection", m_ProjectionTransform);
@@ -56,7 +67,17 @@ void Object::Draw() const
 	m_Shader->SetVec3("u_material.specular", m_Material->GetSpecular());
 	m_Shader->SetFloat("u_material.shininess", m_Material->GetShininess());
 
-	// m_Shader->SetFloat("u_time", 3 * glfwGetTime());
+	// Update point lights data
+	m_Shader->SetInt("u_pointLightsCount", m_PointLights.size());
+	for (size_t i = 0; i < m_PointLights.size(); ++i) 
+	{
+		// std::cout << m_PointLights[i].ambient.r << " " << m_PointLights[i].ambient.g << " " << m_PointLights[i].ambient.b << std::endl;
+
+		m_Shader->SetVec3("u_pointLights[" + std::to_string(i) + "].position", m_ViewTransform * glm::vec4(m_PointLights[i].position, 1.0f));
+		m_Shader->SetVec3("u_pointLights[" + std::to_string(i) + "].ambient", m_PointLights[i].ambient);
+		m_Shader->SetVec3("u_pointLights[" + std::to_string(i) + "].diffuse", m_PointLights[i].diffuse);
+		m_Shader->SetVec3("u_pointLights[" + std::to_string(i) + "].specular", m_PointLights[i].specular);
+	}
 
 	// Rendering geometry
 	size_t indicesCount = m_Mesh->GetIndicesCount();
@@ -73,6 +94,7 @@ void Object::Draw() const
 		emisTex->Unbind();
 
 	m_Mesh->Unbind();
+	m_PointLights.clear();
 }
 
 void Object::SetName(const std::string& name)

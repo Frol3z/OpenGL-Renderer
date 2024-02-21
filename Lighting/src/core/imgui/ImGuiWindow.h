@@ -25,6 +25,7 @@ private:
 	void CreateCameraUI(Camera& camera);
 	void CreateDirectionalLightUI(DirectionalLight& dirLight);
 	void CreateObjectsUI(Scene* scene);
+	void CreatePointLightsUI(Scene* scene);
 
 	template <class T>
 	bool CreateCombobox(std::vector<std::unique_ptr<T>>& vector, int* selected, std::string&& text);

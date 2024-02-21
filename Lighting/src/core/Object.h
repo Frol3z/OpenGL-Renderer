@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -8,6 +9,16 @@
 #include "geometry/Mesh.h"
 #include "Shader.h"
 #include "Material.hpp"
+
+struct PointLightData
+{
+	glm::vec3 position;
+	float radius;
+
+	glm::vec3 ambient;
+	glm::vec3 diffuse;
+	glm::vec3 specular;
+};
 
 class Object
 {
@@ -20,7 +31,7 @@ public:
 public:
 	Object(std::string&& name, Mesh* mesh, Material* material, Shader* shader);
 
-	virtual void Draw() const;
+	virtual void Draw();
 	
 	// Setters
 	void SetName(const std::string& name);
@@ -40,6 +51,7 @@ public:
 	inline const glm::vec3& GetPosition() const { return m_Position; }
 	inline const glm::vec3& GetRotation() const { return m_Rotation; }
 	inline const glm::vec3 GetScale() const { return m_Scale; }
+	inline std::vector<PointLightData>& GetPointLights() { return m_PointLights; }
 
 protected:
 	std::string m_Name;
@@ -59,4 +71,6 @@ protected:
 
 	glm::mat4 m_ViewTransform;
 	glm::mat4 m_ProjectionTransform;
+
+	std::vector<PointLightData> m_PointLights;
 };

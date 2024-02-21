@@ -13,6 +13,12 @@ void Scene::Draw()
 	for (auto& pointLight : m_PointLights)
 	{
 		pointLight->SetViewAndProjectionMatrix(m_Camera.GetViewMatrix(), m_Camera.GetProjectionMatrix());
+
+		for (auto& object : m_Objects)
+		{
+			pointLight->AffectObject(object.get());
+		}
+
 		pointLight->Draw();
 	}
 
