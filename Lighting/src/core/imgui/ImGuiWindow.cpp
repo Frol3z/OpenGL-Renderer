@@ -77,22 +77,26 @@ void ImGuiWindow::Render() const
 
 void ImGuiWindow::CreateCameraUI(Camera& camera)
 {
+	ImGui::SeparatorText("Properties");
+
 	// Speed
 	float speed = camera.GetSpeed();
-	if (ImGui::SliderFloat("Speed", &speed, 0.1f, 100.0f))
+	if (ImGui::DragFloat("Speed", &speed, 1.0f, 0.1f, 100.0f))
 		camera.SetSpeed(speed);
 
 	// Sensitivity
 	float sensitivity = camera.GetSensitivity();
-	if (ImGui::SliderFloat("Sensitivity", &sensitivity, 0.001f, 5.0f))
+	if (ImGui::DragFloat("Sensitivity", &sensitivity, 0.1f, 0.001f, 5.0f))
 		camera.SetSensitivity(sensitivity);
 }
 
 void ImGuiWindow::CreateDirectionalLightUI(DirectionalLight& dirLight)
 {
+	ImGui::SeparatorText("Properties");
+
 	// Direction
 	float direction[3] = { dirLight.GetDirection().x, dirLight.GetDirection().y, dirLight.GetDirection().z };
-	if (ImGui::SliderFloat3("Direction", direction, -1.0f, 1.0f))
+	if (ImGui::DragFloat3("Direction", direction, 0.1f, -1.0f, 1.0f))
 		dirLight.SetDirection(glm::vec3(direction[0], direction[1], direction[2]));
 
 	float color[3] = { dirLight.GetColor().r, dirLight.GetColor().g, dirLight.GetColor().b };
@@ -110,7 +114,7 @@ void ImGuiWindow::CreateDirectionalLightUI(DirectionalLight& dirLight)
 	}
 
 	// Intensity
-	if (ImGui::SliderFloat("Intensity", &intensity, 0.0f, 10.0f))
+	if (ImGui::DragFloat("Intensity", &intensity, 0.1f, 0.0f, 10.0f))
 	{
 		dirLight.SetIntensity(intensity);
 		dirLight.SetAmbient(glm::vec3(intensity * ambStrength * color[0], intensity * ambStrength * color[1], intensity * ambStrength * color[2]));
@@ -171,34 +175,35 @@ void ImGuiWindow::CreateObjectsUI(Scene* scene)
 	}
 
 	// Scene tree
-	ImGui::NewLine();
 	for (int i = 0; i < objects.size(); i++)
 	{
+		ImGui::PushID("Object " + i);
+
 		if (i == 0)
 			ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 
 		if (ImGui::TreeNode((void*)(intptr_t)i, objects[i]->GetName().c_str(), i))
 		{
-			ImGui::PushID(i);
-			ImGui::NewLine();
+			
+			ImGui::SeparatorText("Properties");
 
 			// Object position
 			auto objectPos = objects[i]->GetPosition();
 			float position[3] = { objectPos.x, objectPos.y, objectPos.z };
-			if (ImGui::SliderFloat3("Position", position, -10.0f, 10.0f))
+			if (ImGui::DragFloat3("Position", position))
 				objects[i]->SetPosition(glm::vec3(position[0], position[1], position[2]));
 
 			// Object rotation
 			auto objectRot = objects[i]->GetRotation();
 			float rotation[3] = { objectRot.x, objectRot.y, objectRot.z };
-			if (ImGui::SliderFloat3("Rotation", rotation, -180.0f, 180.0f))
+			if (ImGui::DragFloat3("Rotation", rotation, 1.0f, -180.0f, 180.0f))
 				objects[i]->SetRotation(glm::vec3(rotation[0], rotation[1], rotation[2]));
 
 			// Object scale
 			bool& isUniformScaling = objects[i]->isUniformScaling;
 			auto objectScale = objects[i]->GetScale();
 			float scale[3] = { objectScale.x, objectScale.y, objectScale.z };
-			if (ImGui::SliderFloat3("Scale", scale, 0.1f, 10.0f))
+			if (ImGui::DragFloat3("Scale", scale, 0.1f, 0.1f, 10.0f))
 			{
 				if (isUniformScaling)
 				{
@@ -245,18 +250,18 @@ void ImGuiWindow::CreateObjectsUI(Scene* scene)
 			if (CreateCombobox(shaders, &objects[i]->selectedShader, "Shader"))
 				objects[i]->SetShader(shaders.at(objects[i]->selectedShader).get());
 
+			ImGui::Separator();
+
 			// Delete button
-			ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 100);
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.66f, 0.2f, 0.2f, 1.0f));
 			if (ImGui::Button("Remove"))
 			{
 				scene->RemoveObject(i);
 			}
 			ImGui::PopStyleColor();
-
-			ImGui::PopID();
 			ImGui::TreePop();
 		}
+		ImGui::PopID();
 	}
 }
 
@@ -264,67 +269,60 @@ void ImGuiWindow::CreatePointLightsUI(Scene* scene)
 {
 	auto& lights = scene->GetPointLights();
 
-	/*
-		// Add object button
-		if (ImGui::Button("Add point light"))
-			ImGui::OpenPopup("New point light");
+	// Add point light button
+	if (ImGui::Button("Add point light"))
+		ImGui::OpenPopup("New point light");
 
-		// Add object modal
-		if (ImGui::BeginPopupModal("New point light", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+	// Add light modal
+	if (ImGui::BeginPopupModal("New point light", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		ImGui::InputText("Name", m_Buffer, sizeof(m_Buffer));
+
+		// Confirm button
+		if (ImGui::Button("OK"))
 		{
-			ImGui::InputText("Name", m_Buffer, sizeof(m_Buffer));
+			// Creating the new point light (with hardcoded indices :/)
+			std::unique_ptr<PointLight> newLight = std::make_unique<PointLight>(
+				std::string(m_Buffer),
+				scene->GetMeshes().at(1).get(),
+				scene->GetMaterials().at(0).get(),
+				scene->GetShaders().at(3).get()
+			);
+			newLight->SetScale(glm::vec3(0.2));
+			scene->AddPointLight(std::move(newLight));
 
-			// Choice:
-			//	- color
-			//	- radius
-			//  - intensity (?)
+			// Reset inputs
+			m_SelectedMesh = 0;
+			m_SelectedMaterial = 0;
+			m_SelectedShader = 0;
+			std::memset(m_Buffer, 0, sizeof(m_Buffer));
+			strcpy_s(m_Buffer, sizeof(m_Buffer), "Unnamed");
 
-			// Confirm button
-			if (ImGui::Button("OK"))
-			{
-				// Creating the new object
-				std::unique_ptr<PointLight> newLight = std::make_unique<PointLight>(
-					std::string(m_Buffer),
-					meshes.at(m_SelectedMesh).get(),
-					materials.at(m_SelectedMaterial).get(),
-					shaders.at(m_SelectedShader).get()
-				);
-				scene->AddObject(std::move(newObject));
-
-				// Reset inputs
-				m_SelectedMesh = 0;
-				m_SelectedMaterial = 0;
-				m_SelectedShader = 0;
-				std::memset(m_Buffer, 0, sizeof(m_Buffer));
-				strcpy_s(m_Buffer, sizeof(m_Buffer), "Unnamed");
-
-				ImGui::CloseCurrentPopup();
-			}
-
-			ImGui::SameLine();
-
-			// Cancel button
-			if (ImGui::Button("Cancel"))
-				ImGui::CloseCurrentPopup();
-
-			ImGui::EndPopup();
+			ImGui::CloseCurrentPopup();
 		}
-	*/
+
+		ImGui::SameLine();
+
+		// Cancel button
+		if (ImGui::Button("Cancel"))
+			ImGui::CloseCurrentPopup();
+
+		ImGui::EndPopup();
+	}
 
 	for (int i = 0; i < lights.size(); i++)
 	{
+		ImGui::PushID("Point light " + i);
+
 		if (ImGui::TreeNode((void*)(intptr_t)i, lights[i]->GetName().c_str(), i))
 		{
-			ImGui::PushID(i);
-			ImGui::NewLine();
+			ImGui::SeparatorText("Properties");
 
 			// Object position
 			auto objectPos = lights[i]->GetPosition();
 			float position[3] = { objectPos.x, objectPos.y, objectPos.z };
-			if (ImGui::SliderFloat3("Position", position, -10.0f, 10.0f))
+			if (ImGui::DragFloat3("Position", position))
 				lights[i]->SetPosition(glm::vec3(position[0], position[1], position[2]));
-
-			ImGui::NewLine();
 
 			// Change light settings
 			float color[3] = { lights[i]->GetColor().r, lights[i]->GetColor().g, lights[i]->GetColor().b };
@@ -342,7 +340,7 @@ void ImGuiWindow::CreatePointLightsUI(Scene* scene)
 			}
 
 			// Intensity
-			if (ImGui::SliderFloat("Intensity", &intensity, 0.0f, 10.0f))
+			if (ImGui::DragFloat("Intensity", &intensity, 0.1f, 0.0f, 10.0f))
 			{
 				lights[i]->SetIntensity(intensity);
 				lights[i]->SetAmbient(glm::vec3(intensity * ambStrength * color[0], intensity * ambStrength * color[1], intensity * ambStrength * color[2]));
@@ -350,18 +348,18 @@ void ImGuiWindow::CreatePointLightsUI(Scene* scene)
 				lights[i]->SetSpecular(glm::vec3(intensity * color[0], intensity * color[1], intensity * color[2]));
 			}
 
+			ImGui::Separator();
+
 			// Delete button
-			ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 100);
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.66f, 0.2f, 0.2f, 1.0f));
 			if (ImGui::Button("Remove"))
 			{
 				scene->RemovePointLight(i);
 			}
 			ImGui::PopStyleColor();
-
-			ImGui::PopID();
 			ImGui::TreePop();
 		}
+		ImGui::PopID();
 	}
 }
 

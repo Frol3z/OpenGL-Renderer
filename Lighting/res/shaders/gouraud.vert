@@ -1,5 +1,7 @@
 #version 460 core
 
+#define MAX_POINT_LIGHTS 128
+
 layout (location = 0) in vec3 vPosition;
 layout (location = 1) in vec3 vNormal;
 
@@ -21,14 +23,31 @@ struct DirLight
 	vec3 specular;
 };
 
+struct PointLight
+{
+	vec3 position;
+	
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+
+	float constant;
+	float linear;
+	float quadratic;
+};
+
 uniform Material u_material;
 uniform DirLight u_dirLight;
+
+uniform int u_pointLightsCount;
+uniform PointLight u_pointLights[MAX_POINT_LIGHTS];
 
 uniform mat4 u_model;
 uniform mat4 u_view;
 uniform mat4 u_projection;
 
 vec3 CalcDirLight(DirLight dir, Material mat, vec3 normal, vec3 viewDir);
+vec3 CalcPointLight(PointLight light, Material mat, vec3 normal, vec3 viewDir);
 
 void main()
 {
@@ -43,7 +62,9 @@ void main()
 
 	result += CalcDirLight(u_dirLight, u_material, norm, viewDir);
 
-	// @todo Point lights
+	for(int i = 0; i < u_pointLightsCount; i++)
+      result += CalcPointLight(u_pointLights[i], u_material, norm, viewDir);
+
 	// @todo Spot lights
 	Color = result;
 };
@@ -64,5 +85,32 @@ vec3 CalcDirLight(DirLight dir, Material mat, vec3 normal, vec3 viewDir)
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), mat.shininess);
 	vec3 specular = dir.specular * spec * mat.specular;
 
-	return ambient + diffuse + specular;
+	return ambient + diffuse;
+}
+
+vec3 CalcPointLight(PointLight light, Material mat, vec3 normal, vec3 viewDir)
+{
+	vec3 distanceVec = vec3(vec4(light.position, 1.0) - (u_view * u_model * vec4(vPosition, 1.0)));
+	vec3 lightDir = normalize(distanceVec);
+	vec3 ambient, diffuse, specular;
+	float distance = length(distanceVec);
+	float attenuation = 1 / distance;
+
+	// Ambient
+	ambient = light.ambient * mat.ambient;
+
+	// Diffuse
+	float diff = max(dot(normal, vec3(lightDir)), 0.0);
+	diffuse = light.diffuse * diff * mat.diffuse;
+
+	// Specular
+	vec3 reflectDir = reflect(vec3(-lightDir), normal);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), mat.shininess);
+	specular = light.specular * spec * mat.specular;
+
+	ambient *= attenuation;
+	diffuse *= attenuation;
+	specular *= attenuation;
+
+	return ambient + diffuse;
 }

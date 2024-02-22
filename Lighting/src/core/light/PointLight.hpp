@@ -20,7 +20,7 @@ public:
 		m_Shader->SetMat4("u_model", m_TranslationTransform * m_RotationTransform * m_ScaleTransform);
 		m_Shader->SetMat4("u_view", m_ViewTransform);
 		m_Shader->SetMat4("u_projection", m_ProjectionTransform);
-		m_Shader->SetVec3("u_Color", m_Color);
+		m_Shader->SetVec3("u_Color", m_Intensity * m_Color);
 
 		// Rendering geometry
 		size_t indicesCount = m_Mesh->GetIndicesCount();
