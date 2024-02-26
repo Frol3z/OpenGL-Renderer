@@ -114,7 +114,7 @@ void ImGuiWindow::CreateDirectionalLightUI(DirectionalLight& dirLight)
 	}
 
 	// Intensity
-	if (ImGui::DragFloat("Intensity", &intensity, 0.1f, 0.0f, 10.0f))
+	if (ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 1.0f))
 	{
 		dirLight.SetIntensity(intensity);
 		dirLight.SetAmbient(glm::vec3(intensity * ambStrength * color[0], intensity * ambStrength * color[1], intensity * ambStrength * color[2]));
@@ -324,6 +324,10 @@ void ImGuiWindow::CreatePointLightsUI(Scene* scene)
 			if (ImGui::DragFloat3("Position", position))
 				lights[i]->SetPosition(glm::vec3(position[0], position[1], position[2]));
 
+			float radius = lights[i]->GetRadius();
+			if (ImGui::DragFloat("Radius", &radius, 0.1f, 0.0f, 100.0f))
+				lights[i]->SetRadius(radius);
+
 			// Change light settings
 			float color[3] = { lights[i]->GetColor().r, lights[i]->GetColor().g, lights[i]->GetColor().b };
 			float intensity = lights[i]->GetIntensity();
@@ -340,7 +344,7 @@ void ImGuiWindow::CreatePointLightsUI(Scene* scene)
 			}
 
 			// Intensity
-			if (ImGui::DragFloat("Intensity", &intensity, 0.1f, 0.0f, 10.0f))
+			if (ImGui::DragFloat("Intensity", &intensity, 0.01f, 0.0f, 1.0f))
 			{
 				lights[i]->SetIntensity(intensity);
 				lights[i]->SetAmbient(glm::vec3(intensity * ambStrength * color[0], intensity * ambStrength * color[1], intensity * ambStrength * color[2]));

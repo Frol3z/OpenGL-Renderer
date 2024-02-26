@@ -26,14 +26,11 @@ struct DirLight
 struct PointLight
 {
 	vec3 position;
+	float radius;
 	
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
-
-	float constant;
-	float linear;
-	float quadratic;
 };
 
 uniform Material u_material;
@@ -48,6 +45,8 @@ uniform mat4 u_projection;
 
 vec3 CalcDirLight(DirLight dir, Material mat, vec3 normal, vec3 viewDir);
 vec3 CalcPointLight(PointLight light, Material mat, vec3 normal, vec3 viewDir);
+
+float Attenuate(float dist, float radius);
 
 void main()
 {
@@ -94,7 +93,7 @@ vec3 CalcPointLight(PointLight light, Material mat, vec3 normal, vec3 viewDir)
 	vec3 lightDir = normalize(distanceVec);
 	vec3 ambient, diffuse, specular;
 	float distance = length(distanceVec);
-	float attenuation = 1 / distance;
+	float attenuation = Attenuate(distance, light.radius);
 
 	// Ambient
 	ambient = light.ambient * mat.ambient;
@@ -113,4 +112,11 @@ vec3 CalcPointLight(PointLight light, Material mat, vec3 normal, vec3 viewDir)
 	specular *= attenuation;
 
 	return ambient + diffuse;
+}
+
+float Attenuate(float dist, float radius)
+{
+	float attenuation = radius / max(pow(dist, 2), 0.2); // 0.2 = hardcoded radius of the default point light sphere mesh (@todo change)
+	float windowingValue = pow( max( pow(1 - (dist / radius), 4), 0 ), 2);
+	return windowingValue * attenuation;
 }

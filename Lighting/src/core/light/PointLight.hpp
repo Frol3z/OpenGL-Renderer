@@ -5,7 +5,7 @@ class PointLight : public Object
 public:
 	PointLight(std::string&& name, Mesh* mesh, Material* material, Shader* shader) :
 		Object(std::move(name), mesh, material, shader),
-		m_Color(glm::vec3(1.0f)), m_Radius(50.0f),
+		m_Color(glm::vec3(1.0f)), m_Radius(5.0f),
 		m_Ambient(glm::vec3(0.2f)), m_Diffuse(glm::vec3(0.5f)), m_Specular(glm::vec3(1.0f)),
 		m_Intensity(1.0f)
 	{
@@ -44,6 +44,7 @@ public:
 	void SetDiffuse(glm::vec3 diffuse) { m_Diffuse = diffuse; }
 	void SetSpecular(glm::vec3 specular) { m_Specular = specular; }
 	void SetIntensity(float intensity) { m_Intensity = intensity; }
+	void SetRadius(float radius) { m_Radius = radius; }
 
 	// Getters
 	inline glm::vec3 GetColor() const { return m_Color; }
@@ -51,6 +52,7 @@ public:
 	inline glm::vec3 GetDiffuse() const { return m_Diffuse; }
 	inline glm::vec3 GetSpecular() const { return m_Specular; }
 	inline float GetIntensity() const { return m_Intensity; }
+	inline float GetRadius() const { return m_Radius; }
 
 private:
 	glm::vec3 m_Color;

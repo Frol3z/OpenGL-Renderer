@@ -74,6 +74,7 @@ void Object::Draw()
 		// std::cout << m_PointLights[i].ambient.r << " " << m_PointLights[i].ambient.g << " " << m_PointLights[i].ambient.b << std::endl;
 
 		m_Shader->SetVec3("u_pointLights[" + std::to_string(i) + "].position", m_ViewTransform * glm::vec4(m_PointLights[i].position, 1.0f));
+		m_Shader->SetFloat("u_pointLights[" + std::to_string(i) + "].radius", m_PointLights[i].radius);
 		m_Shader->SetVec3("u_pointLights[" + std::to_string(i) + "].ambient", m_PointLights[i].ambient);
 		m_Shader->SetVec3("u_pointLights[" + std::to_string(i) + "].diffuse", m_PointLights[i].diffuse);
 		m_Shader->SetVec3("u_pointLights[" + std::to_string(i) + "].specular", m_PointLights[i].specular);
