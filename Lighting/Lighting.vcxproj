@@ -80,6 +80,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\default.frag" />
+    <None Include="res\shaders\flat.frag" />
+    <None Include="res\shaders\flat.vert" />
     <None Include="res\shaders\gooch.frag" />
     <None Include="res\shaders\gouraud.frag" />
     <None Include="res\shaders\gouraud.vert" />

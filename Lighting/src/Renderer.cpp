@@ -304,6 +304,8 @@ static void SceneSetup()
 	shader->SetName("Default");
 	std::unique_ptr<Shader> gouraud = std::make_unique<Shader>("res/shaders/gouraud.vert", "res/shaders/gouraud.frag");
 	gouraud->SetName("Gouraud (non-textured only)");
+	std::unique_ptr<Shader> flat = std::make_unique<Shader>("res/shaders/flat.vert", "res/shaders/flat.frag");
+	flat->SetName("Flat (non-textured only)");
 	std::unique_ptr<Shader> gooch = std::make_unique<Shader>("res/shaders/default.vert", "res/shaders/gooch.frag");
 	gooch->SetName("Gooch (currently not working)");
 	std::unique_ptr<Shader> pointLightShader = std::make_unique<Shader>("res/shaders/default.vert", "res/shaders/point_light.frag");
@@ -381,6 +383,7 @@ static void SceneSetup()
 
 	scene->AddShader(std::move(shader));
 	scene->AddShader(std::move(gouraud));
+	scene->AddShader(std::move(flat));
 	scene->AddShader(std::move(gooch));
 	scene->AddShader(std::move(pointLightShader));
 

@@ -194,6 +194,8 @@
     <None Include="src\vendor\imgui\imgui.natstepfilter" />
     <None Include="res\shaders\gooch.frag" />
     <None Include="res\shaders\default.frag" />
+    <None Include="res\shaders\flat.frag" />
+    <None Include="res\shaders\flat.vert" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="src\vendor\imgui\imgui.natvis" />
