@@ -3,6 +3,8 @@
 Welcome to my OpenGL Renderer project!
 This is an on-going collection of projects where I'm currently experimenting by creating, modifying and destroying stuff during my learning journey in graphics programming.
 
+![image](https://github.com/Frol3z/OpenGL-Renderer/assets/56247530/9e4c529a-930c-42c8-b980-f42cb5ce806d)
+
 ## Introduction
 I started my journey with zero knowledge about computer graphics and C++, although I did have prior experience with other programming languages and computer science.
 This repository is meant to be a place to collect different small projects where I explore and implement computer graphics techniques while simultaneously learning C++ and OpenGL.
