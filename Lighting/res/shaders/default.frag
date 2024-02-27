@@ -23,6 +23,7 @@ struct Material
 struct DirLight
 {
 	vec3 direction; // from the light
+
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
@@ -38,16 +39,30 @@ struct PointLight
 	vec3 specular;
 };
 
+struct SpotLight
+{
+	vec3 direction; // from the light
+	float cutOff;
+	float outerCutOff;
+
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+};
+
 uniform Material u_material;
 uniform DirLight u_dirLight;
+uniform SpotLight u_spotLight;
 
 uniform int u_pointLightsCount;
 uniform PointLight u_pointLights[MAX_POINT_LIGHTS];
 
 uniform bool u_isTextured;
+uniform bool u_isFlashlightOn;
 
 vec3 CalcDirLight(DirLight dir, Material mat, vec3 normal, vec3 viewDir);
 vec3 CalcPointLight(PointLight light, Material mat, vec3 normal, vec3 viewDir);
+vec3 CalcSpotLight(SpotLight light, Material mat, vec3 normal, vec3 viewDir);
 
 float Attenuate(float dist, float radius);
 
@@ -58,12 +73,16 @@ void main()
 	vec3 norm = normalize(Normal);
 	vec3 viewDir = normalize(vec3(0.0) - FragPosition);
 
+	// Directional light
 	result += CalcDirLight(u_dirLight, u_material, norm, viewDir);
 
+	// Point lights
 	for(int i = 0; i < u_pointLightsCount; i++)
       result += CalcPointLight(u_pointLights[i], u_material, norm, viewDir);
 
-	// @todo Spot lights
+	// Spot light / flash light
+	if(u_isFlashlightOn)
+		result += CalcSpotLight(u_spotLight, u_material, norm, viewDir);
 
 	if(u_isTextured)
 	  result += vec3(texture(u_material.emissionMap, TexCoord));
@@ -147,6 +166,50 @@ vec3 CalcPointLight(PointLight light, Material mat, vec3 normal, vec3 viewDir)
 	ambient *= attenuation;
 	diffuse *= attenuation;
 	specular *= attenuation;
+
+	return ambient + diffuse + specular;
+}
+
+vec3 CalcSpotLight(SpotLight light, Material mat, vec3 normal, vec3 viewDir)
+{
+	vec3 lightDir = normalize(vec3(0) - FragPosition);
+	vec3 ambient = vec3(0.0), diffuse = vec3(0.0), specular = vec3(0.0);
+	float theta = dot(lightDir, normalize(-light.direction));
+	float epsilon = light.cutOff - light.outerCutOff;
+	float intensity = smoothstep(0.0, 1.0, (theta - light.outerCutOff) / epsilon);  
+
+	if(u_isTextured)
+	{
+		// Ambient
+		ambient = light.ambient * vec3(texture(u_material.diffuseMap, TexCoord));
+
+		// Diffuse
+		float diff = max(dot(normal, vec3(lightDir)), 0.0);
+		diffuse = light.diffuse * diff * vec3(texture(u_material.diffuseMap, TexCoord));
+
+		// Specular
+		vec3 reflectDir = reflect(vec3(-lightDir), normal);
+		float spec = pow(max(dot(viewDir, reflectDir), 0.0), u_material.shininess);
+		specular = light.specular * spec * vec3(texture(u_material.specularMap, TexCoord));
+	} 
+	else
+	{
+		// Ambient
+		ambient = light.ambient * mat.ambient;
+
+		// Diffuse
+		float diff = max(dot(normal, vec3(lightDir)), 0.0);
+		diffuse = light.diffuse * diff * mat.diffuse;
+
+		// Specular
+		vec3 reflectDir = reflect(vec3(-lightDir), normal);
+		float spec = pow(max(dot(viewDir, reflectDir), 0.0), mat.shininess);
+		specular = light.specular * spec * mat.specular;
+	}
+
+	ambient *= intensity;
+	diffuse *= intensity;
+	specular *= intensity;
 
 	return ambient + diffuse + specular;
 }

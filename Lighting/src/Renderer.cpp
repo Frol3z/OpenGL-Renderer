@@ -405,7 +405,7 @@ static void OnKeyboard(GLFWwindow* window, int key, int scancode, int action, in
 			glfwSetWindowShouldClose(window, true);
 		break;
 	}
-	case GLFW_KEY_F:
+	case GLFW_KEY_F11:
 	{
 		if (!isCursorDisabled)
 			break;
@@ -450,6 +450,17 @@ static void OnKeyboard(GLFWwindow* window, int key, int scancode, int action, in
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				LOG("Wireframe mode: OFF");
 			}
+		}
+		break;
+	}
+	case GLFW_KEY_F:
+	{
+		if (!isCursorDisabled)
+			break;
+
+		if (action == GLFW_PRESS)
+		{
+			scene->ToggleFlashlight();
 		}
 		break;
 	}
@@ -532,7 +543,7 @@ static void PrintDefault()
 {
 	LOG("OpenGL version: " << glGetString(GL_VERSION));
 	LOG("Press ESC to exit");
-	LOG("Press F to toggle borderless fullscreen");
+	LOG("Press F11 to toggle borderless fullscreen");
 	LOG("Right click to toggle mouse visibility");
 	LOG("Press G to toggle wireframe mode");
 	LOG("Use WASD and mouse to move around (scroll to zoom)");

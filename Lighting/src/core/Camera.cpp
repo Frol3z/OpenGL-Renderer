@@ -95,6 +95,11 @@ const glm::mat4 Camera::GetProjectionMatrix() const
 	return m_ProjectionMatrix;
 }
 
+const glm::vec3 Camera::GetForwardVector() const
+{
+	return m_Front;
+}
+
 void Camera::SetSpeed(const float speed)
 {
 	m_Speed = speed;

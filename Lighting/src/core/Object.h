@@ -45,6 +45,7 @@ public:
 
 	void SetViewAndProjectionMatrix(const glm::mat4& view, const glm::mat4& proj);
 	void SetDirectionalLight(glm::vec3&& direction, glm::vec3&& ambient, glm::vec3&& diffuse, glm::vec3&& specular);
+	void SetFlashlight(bool isFlashlightOn);
 
 	// Getters
 	inline const std::string& GetName() const { return m_Name; }

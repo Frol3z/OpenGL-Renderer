@@ -159,3 +159,16 @@ void Object::SetDirectionalLight(glm::vec3&& direction, glm::vec3&& ambient, glm
 	m_Shader->SetVec3("u_dirLight.diffuse", diffuse);
 	m_Shader->SetVec3("u_dirLight.specular", specular);
 }
+
+void Object::SetFlashlight(bool isFlashlightOn)
+{
+	m_Shader->Use();
+
+	m_Shader->SetBool("u_isFlashlightOn", isFlashlightOn);
+	m_Shader->SetVec3("u_spotLight.direction", glm::vec3(0.0f, 0.0f, -1.0f));
+	m_Shader->SetVec3("u_spotLight.ambient", 0.2f * glm::vec3(1.0f, 0.902f, 0.784f));
+	m_Shader->SetVec3("u_spotLight.diffuse", 0.5f * glm::vec3(1.0f, 0.902f, 0.784f));
+	m_Shader->SetVec3("u_spotLight.specular", glm::vec3(1.0f, 0.902f, 0.784f));
+	m_Shader->SetFloat("u_spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+	m_Shader->SetFloat("u_spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
+}

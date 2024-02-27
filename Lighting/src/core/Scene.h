@@ -18,6 +18,7 @@ public:
 	Scene();
 
 	void Draw();
+	void ToggleFlashlight();
 
 	void AddObject(std::unique_ptr<Object> obj);
 	void RemoveObject(size_t toDelete);
@@ -55,4 +56,6 @@ private:
 	std::vector<std::unique_ptr<Shader>> m_Shaders;
 	std::vector<std::unique_ptr<Material>> m_Materials;
 	std::vector<std::unique_ptr<Texture>> m_Textures;
+
+	bool m_IsFlashlightOn;
 };

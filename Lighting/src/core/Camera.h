@@ -27,11 +27,12 @@ public:
 	void ProcessMouseMovement(float xOffset, float yOffset, bool constrainPitch = true);
 	void UpdateFOV(float offset);
 
-	// Matrix Getters
+	// Getters
 	const glm::mat4 GetViewMatrix() const;
 	const glm::mat4 GetProjectionMatrix() const;
+	const glm::vec3 GetForwardVector() const;
 
-	// Camera Settings Setters
+	// Setters
 	void SetSpeed(const float speed);
 	void SetSensitivity(const float sensitivity);
 	inline const float GetSpeed() const { return m_Speed; }

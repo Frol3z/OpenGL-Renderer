@@ -4,7 +4,8 @@
 #include <iostream>
 
 Scene::Scene() :
-	m_Camera(Camera(CAMERA_RES_WIDTH, CAMERA_RES_HEIGHT, glm::vec3(0.0f, 0.0f, 3.0f)))
+	m_Camera(Camera(CAMERA_RES_WIDTH, CAMERA_RES_HEIGHT, glm::vec3(0.0f, 0.0f, 3.0f))),
+	m_IsFlashlightOn(false)
 {
 }
 
@@ -26,8 +27,16 @@ void Scene::Draw()
 	{
 		object->SetViewAndProjectionMatrix(m_Camera.GetViewMatrix(), m_Camera.GetProjectionMatrix());
 		object->SetDirectionalLight(m_DirLight.GetDirection(), m_DirLight.GetAmbient(), m_DirLight.GetDiffuse(), m_DirLight.GetSpecular());
+		
+		object->SetFlashlight(m_IsFlashlightOn);
+
 		object->Draw();
 	}
+}
+
+void Scene::ToggleFlashlight()
+{
+	m_IsFlashlightOn = !m_IsFlashlightOn;
 }
 
 void Scene::AddObject(std::unique_ptr<Object> obj)
