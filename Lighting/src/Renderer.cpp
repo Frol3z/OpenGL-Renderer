@@ -546,6 +546,7 @@ static void PrintDefault()
 	LOG("Press F11 to toggle borderless fullscreen");
 	LOG("Right click to toggle mouse visibility");
 	LOG("Press G to toggle wireframe mode");
+	LOG("Press F to toggle flashlight");
 	LOG("Use WASD and mouse to move around (scroll to zoom)");
 }
 
