@@ -1,4 +1,11 @@
+#pragma once
+
 #include <iostream>
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/string_cast.hpp>
+
+#define GLM_TO_STRING(x) glm::to_string(x).c_str()
 
 class Logger
 {
@@ -11,9 +18,10 @@ public:
 	};
 
 public:
-	Logger()
-		: m_LogLevel(LEVEL_ERROR)
+	static Logger& Get()
 	{
+		static Logger instance;
+		return instance;
 	}
 
 	void SetLevel(Level level)
@@ -39,4 +47,9 @@ public:
 
 private:
 	Level m_LogLevel;
+
+private:
+	Logger() : m_LogLevel(LEVEL_ERROR) {}
+	Logger(const Logger&) = delete;
+	Logger& operator=(const Logger&) = delete;
 };

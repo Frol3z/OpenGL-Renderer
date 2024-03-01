@@ -92,7 +92,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\vendor\imgui;$(SolutionDir)Dependencies\includes</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\vendor\imgui;$(ProjectDir)src;$(SolutionDir)Dependencies\includes</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -109,7 +109,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\vendor\imgui;$(SolutionDir)Dependencies\includes</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\vendor\imgui;$(ProjectDir)src;$(SolutionDir)Dependencies\includes</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -126,7 +126,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\vendor\imgui;$(SolutionDir)Dependencies\includes</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\vendor\imgui;$(ProjectDir)src;$(SolutionDir)Dependencies\includes</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -143,7 +143,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)src\vendor\imgui;$(SolutionDir)Dependencies\includes</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\vendor\imgui;$(ProjectDir)src;$(SolutionDir)Dependencies\includes</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -166,16 +166,13 @@
     <None Include="src\vendor\imgui\imgui.natstepfilter" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\common\FileDialog.cpp" />
     <ClCompile Include="src\core\Camera.cpp" />
-    <ClCompile Include="src\core\geometry\IndexBuffer.cpp" />
-    <ClCompile Include="src\core\geometry\Mesh.cpp" />
-    <ClCompile Include="src\core\geometry\VertexArray.cpp" />
-    <ClCompile Include="src\core\geometry\VertexBuffer.cpp" />
     <ClCompile Include="src\core\imgui\ImGuiWindow.cpp" />
-    <ClCompile Include="src\core\Object.cpp" />
+    <ClCompile Include="src\core\Mesh.cpp" />
+    <ClCompile Include="src\core\Model.cpp" />
     <ClCompile Include="src\core\Scene.cpp" />
     <ClCompile Include="src\core\Shader.cpp" />
-    <ClCompile Include="src\core\Texture.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\vendor\cubesphere\Cubesphere.cpp" />
     <ClCompile Include="src\vendor\glad\glad.c" />
@@ -189,21 +186,15 @@
     <ClCompile Include="src\vendor\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\common\timer\Timer.hpp" />
+    <ClInclude Include="src\common\FileDialog.h" />
+    <ClInclude Include="src\common\Logger.hpp" />
+    <ClInclude Include="src\common\Timer.hpp" />
     <ClInclude Include="src\core\Camera.h" />
-    <ClInclude Include="src\core\geometry\IndexBuffer.h" />
-    <ClInclude Include="src\core\geometry\Mesh.h" />
-    <ClInclude Include="src\core\geometry\VertexArray.h" />
-    <ClInclude Include="src\core\geometry\VertexBuffer.h" />
-    <ClInclude Include="src\core\geometry\VertexBufferLayout.h" />
     <ClInclude Include="src\core\imgui\ImGuiWindow.h" />
-    <ClInclude Include="src\core\light\DirectionalLight.hpp" />
-    <ClInclude Include="src\core\light\PointLight.hpp" />
-    <ClInclude Include="src\core\Material.hpp" />
-    <ClInclude Include="src\core\Object.h" />
+    <ClInclude Include="src\core\Mesh.h" />
+    <ClInclude Include="src\core\Model.h" />
     <ClInclude Include="src\core\Scene.h" />
     <ClInclude Include="src\core\Shader.h" />
-    <ClInclude Include="src\core\Texture.h" />
     <ClInclude Include="src\vendor\cubesphere\Cubesphere.h" />
     <ClInclude Include="src\vendor\imgui\imconfig.h" />
     <ClInclude Include="src\vendor\imgui\imgui.h" />

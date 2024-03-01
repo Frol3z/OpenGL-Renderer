@@ -8,37 +8,43 @@
 #include <sstream>
 #include <memory>
 
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/string_cast.hpp>
-
-#include "common/timer/Timer.hpp"
-#include "common/logger/Logger.hpp"
+#include "common/Logger.hpp"
+#include "common/Timer.hpp"
 
 #include "core/imgui/ImGuiWindow.h"
+#include "core/Shader.h"
+#include "core/Scene.h"
 
 #define WINDOW_TITLE "OpenGL Renderer"
 #define WINDOW_WIDTH 1280
 #define WINDOW_HEIGHT 720
 
-// @todo remove
-#define LOG_GLM(x) LOG(glm::to_string(x).c_str())
-
 // Window
 ImGuiWindow imGui;
 GLFWwindow* window;
 bool isFullscreen = false;
+
+// Mouse input
+float lastX = 0.0f;
+float lastY = 0.0f;
+bool isFirstMouse = true;
 bool isCursorDisabled = true;
 
 Timer& timer = Timer::Get();
-Logger logger;
+Logger& logger = Logger::Get();
+std::unique_ptr<Scene> scene = std::make_unique<Scene>();
+Camera& camera = scene->GetCamera();
 
 static int Init();
 static void Shutdown();
 static void UpdatePerformanceDisplay();
+static void ProcessCameraInput();
 static void ClearBuffers();
 
 static void OnResize(GLFWwindow* window, int width, int height);
 static void OnKeyboard(GLFWwindow* window, int key, int scancode, int action, int mods);
+static void OnMouse(GLFWwindow* window, double xpos, double ypos);
+static void OnScroll(GLFWwindow* window, double xoffset, double yoffset);
 static void OnMouseButton(GLFWwindow* window, int button, int action, int mods);
 
 static GLFWwindow* CreateWindow();
@@ -51,16 +57,19 @@ int main()
 		return -1;
 	}
 	
+	Shader shader("res/shaders/default.vert", "res/shaders/default.frag");
+
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
 
-		timer.Update(glfwGetTime());
 		UpdatePerformanceDisplay();
-
-		imGui.Update(isCursorDisabled);
+		imGui.Update(isCursorDisabled, scene.get());
+		ProcessCameraInput();
 
 		ClearBuffers();
+
+		scene->Draw(shader);
 		imGui.Render();
 		glfwSwapBuffers(window);
 	}
@@ -110,6 +119,8 @@ static int Init()
 	// Input init
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetKeyCallback(window, OnKeyboard);
+	glfwSetCursorPosCallback(window, OnMouse);
+	glfwSetScrollCallback(window, OnScroll);
 	glfwSetMouseButtonCallback(window, OnMouseButton);
 
 	imGui.Init(window);
@@ -125,12 +136,37 @@ static void Shutdown()
 
 static void UpdatePerformanceDisplay()
 {
+	timer.Update(glfwGetTime());
+
 	std::stringstream ss;
 	ss << WINDOW_TITLE << " " 
 	   << timer.GetMSPF() << "ms "
 	   << timer.GetFPS() << "fps";
 
 	glfwSetWindowTitle(window, ss.str().c_str());
+}
+
+static void ProcessCameraInput()
+{
+	if (isCursorDisabled)
+	{
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		{
+			camera.ProcessKeyboard(CameraMovement::FORWARD, timer.GetDeltaTime());
+		}
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		{
+			camera.ProcessKeyboard(CameraMovement::BACKWARD, timer.GetDeltaTime());
+		}
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		{
+			camera.ProcessKeyboard(CameraMovement::LEFT, timer.GetDeltaTime());
+		}
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		{
+			camera.ProcessKeyboard(CameraMovement::RIGHT, timer.GetDeltaTime());
+		}
+	}
 }
 
 static void ClearBuffers()
@@ -179,6 +215,30 @@ static void OnKeyboard(GLFWwindow* window, int key, int scancode, int action, in
 			break;
 		}
 	}
+}
+
+static void OnMouse(GLFWwindow* window, double xpos, double ypos)
+{
+	if (isFirstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		isFirstMouse = false;
+	}
+
+	float xOffset = xpos - lastX;
+	float yOffset = lastY - ypos;
+	lastX = xpos;
+	lastY = ypos;
+
+	if (isCursorDisabled)
+		camera.ProcessMouseMovement(xOffset, yOffset);
+}
+
+static void OnScroll(GLFWwindow* window, double xoffset, double yoffset)
+{
+	if (isCursorDisabled)
+		camera.UpdateFOV(yoffset);
 }
 
 static void OnMouseButton(GLFWwindow* window, int button, int action, int mods)

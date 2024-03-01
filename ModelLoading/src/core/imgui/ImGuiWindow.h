@@ -1,10 +1,11 @@
 #pragma once
 
-#include <glm/glm.hpp>
 #include <vector>
-
+#include <memory>
 // @todo fix header dependency between glad and glfw
 #include <GLFW/glfw3.h>
+
+#include "core/Scene.h"
 
 class ImGuiWindow
 {
@@ -14,6 +15,13 @@ public:
 public:
 	void Init(GLFWwindow* window);
 	void Shutdown();
-	void Update(bool isCursorDisabled);
+	void Update(bool isCursorDisabled, Scene* scene);
 	void Render() const;
+
+private:
+	GLFWwindow* m_GlfwWindow = nullptr;
+
+private:
+	void CreateMenuBar(Scene* scene);
+	void CreateModelsUI(Scene* scene);
 };

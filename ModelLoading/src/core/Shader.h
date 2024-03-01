@@ -40,6 +40,6 @@ class Shader
 		inline const std::string& GetName() const { return m_Name; }
 
 	private:
-		unsigned int program;
+		unsigned int m_Program;
 		std::string m_Name;
 };
