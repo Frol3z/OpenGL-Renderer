@@ -1,18 +1,11 @@
 # OpenGL Renderer
 
-Welcome to my OpenGL Renderer project!
-This is an ongoing collection of projects where I'm currently experimenting by creating, modifying and destroying stuff during my learning journey in graphics programming.
+This is a collection of various projects I've worked on when I begun learning about computer graphics and C++. The final result is a "goofy" renderer.
+I had absolutely no idea about game engine's architecture or any experience in this field at that time and I was just following my intuition. Therefore the result is kinda "goofy". But I still like it.
 
 ![image](https://github.com/Frol3z/OpenGL-Renderer/assets/56247530/9e4c529a-930c-42c8-b980-f42cb5ce806d)
 
-## Introduction
-I started my journey with zero knowledge about computer graphics and C++, although I did have prior experience with other programming languages and computer science.
-This repository is meant to be a place to collect different small projects where I explore and implement computer graphics techniques while simultaneously learning C++ and OpenGL.
-Feel free to take a look :)
-
-> Please note that these projects are not polished, the code might not be optimized, and design choices might not be optimal. Despite my efforts to keep everything organized and clean, they are primarily experimental, driven by trial and error, and subject to constant iteration.
-
-## Implemented Features
+## Features
 
 - Establishment of a basic OpenGL setup utilizing GLFW for efficient window management.
 - Rendering capability for fundamental geometric primitives such as points, lines, and triangles.
@@ -76,8 +69,6 @@ Moving forward, I plan to:
 - Press the F11 key to toggle borderless fullscreen mode.
 
 ## Resources
-These are the resources I use for learning:
-
 - [Real-Time Rendering](http://www.realtimerendering.com/)
 - [Learn OpenGL](https://learnopengl.com/)
 - [The Cherno YouTube Channel](https://www.youtube.com/user/TheChernoProject)
